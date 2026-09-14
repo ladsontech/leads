@@ -1,5 +1,5 @@
 /* Offline shell. Bump CACHE when you redeploy so clients pick up the new build. */
-const CACHE = 'callsheet-v2';
+const CACHE = 'callsheet-v3';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
