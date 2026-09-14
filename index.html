@@ -1,204 +1,708 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#09090b">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="LeadVault — Manage your leads and outreach from your phone">
-  <title>LeadVault</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/icon-192.png" type="image/png">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Uganda Trades Call Sheet</title>
+<meta name="description" content="Plumbers across Uganda with no website. Tap to call or WhatsApp.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d0d0c" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Call Sheet">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 </head>
 <body>
+<style>
+*{-webkit-tap-highlight-color:transparent}
+img{max-width:100%}
+:root{
+  --paper:#ffffff; --raise:#ffffff; --wash:#f6f5f2; --sunk:#efeeea;
+  --ink:#111110; --muted:#56554e; --faint:#8b8981;
+  --hair:#e4e2dd; --edge:#c8c5be;
+  --sans:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --bar:64px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0d0d0c; --raise:#151514; --wash:#181817; --sunk:#1f1f1d;
+    --ink:#f3f2ee; --muted:#9c9a94; --faint:#76746e;
+    --hair:#292825; --edge:#413f3a;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0d0d0c; --raise:#151514; --wash:#181817; --sunk:#1f1f1d;
+  --ink:#f3f2ee; --muted:#9c9a94; --faint:#76746e;
+  --hair:#292825; --edge:#413f3a;
+}
 
-  <!-- ═══ Home View ════════════════════════════ -->
-  <section id="home-view" class="view active">
-    <div class="home-header">
-      <div>
-        <div class="home-greeting" id="home-greeting">Good afternoon</div>
-        <h1 class="home-title">Lead<span class="accent">Vault</span></h1>
-      </div>
-      <span class="home-badge" id="home-badge">0 leads</span>
-    </div>
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  overscroll-behavior-y:none;
+  padding-bottom:calc(var(--bar) + env(safe-area-inset-bottom));
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001s!important;transition-duration:.001s!important}}
+button,select,input,textarea{font-family:inherit}
+.hold{max-width:720px;margin:0 auto;padding-inline:16px}
 
-    <div class="home-scroll">
-      <!-- Stats Cards -->
-      <div class="stats-grid" id="stats-grid">
-        <div class="stat-card sc-indigo">
-          <div class="stat-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          </div>
-          <div class="stat-value" id="stat-total">0</div>
-          <div class="stat-label">Total Leads</div>
-        </div>
-        <div class="stat-card sc-emerald">
-          <div class="stat-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
-          </div>
-          <div class="stat-value" id="stat-called">0</div>
-          <div class="stat-label">Called</div>
-        </div>
-        <div class="stat-card sc-green">
-          <div class="stat-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          </div>
-          <div class="stat-value" id="stat-wa">0</div>
-          <div class="stat-label">Messaged</div>
-        </div>
-        <div class="stat-card sc-amber">
-          <div class="stat-icon">⭐</div>
-          <div class="stat-value" id="stat-interested">0</div>
-          <div class="stat-label">Interested</div>
-        </div>
-      </div>
+/* ── top bar ─────────────────────────────── */
+.top{position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:1px solid var(--hair)}
+.top-row{display:flex;align-items:center;gap:12px;padding-block:12px 10px}
+.title{margin:0;font-size:17px;font-weight:700;letter-spacing:-.015em;flex:1;min-width:0}
+.count{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.count b{color:var(--ink);font-weight:500}
+.icon-btn{
+  flex:none;width:36px;height:36px;display:grid;place-items:center;
+  background:transparent;border:1px solid var(--edge);border-radius:9px;
+  color:var(--ink);cursor:pointer;
+}
+.icon-btn:active{background:var(--sunk)}
+.icon-btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.rule{height:2px;background:var(--hair)}
+.rule span{display:block;height:100%;width:0;background:var(--ink);transition:width .35s cubic-bezier(.4,0,.2,1)}
+.find{padding-bottom:10px}
+.find input{
+  width:100%;font-size:15px;color:var(--ink);background:var(--wash);
+  border:1px solid transparent;border-radius:10px;padding:10px 12px;
+}
+.find input::placeholder{color:var(--faint)}
+.find input:focus{outline:none;border-color:var(--ink);background:var(--paper)}
 
-      <!-- Progress -->
-      <div class="home-progress" id="home-progress"></div>
+/* ── list ────────────────────────────────── */
+.rows{padding-bottom:8px}
+.row{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:transparent;border:0;border-bottom:1px solid var(--hair);
+  padding:14px 0;cursor:pointer;color:inherit;
+}
+.row:active{background:var(--wash)}
+.row:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.dot{flex:none;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--edge)}
+.row[data-done="1"] .dot{background:var(--ink);border-color:var(--ink)}
+.row[data-warm="1"] .dot{box-shadow:0 0 0 3px var(--sunk)}
+.row-mid{flex:1;min-width:0;overflow:hidden}
+.row-name{
+  display:block;font-size:15.5px;font-weight:600;letter-spacing:-.008em;line-height:1.25;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.row[data-done="1"] .row-name{color:var(--muted)}
+.row-sub{
+  display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--faint);margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.row-end{flex:none;display:flex;align-items:center;gap:8px;color:var(--faint)}
+.row-tel{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+.blank{padding:56px 16px;text-align:center;color:var(--faint);font-size:14px}
 
-      <!-- Timeline (Today, Yesterday, Earlier) -->
-      <div class="home-section">
-        <div class="home-section-title">Activity & Timeline</div>
-        <div class="cat-list" id="timeline-cats"></div>
-      </div>
+/* ── bottom filter bar ───────────────────── */
+.dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  background:var(--paper);border-top:1px solid var(--hair);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.dock-scroll{
+  display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
+  padding:13px 16px;max-width:720px;margin:0 auto;
+}
+.dock-scroll::-webkit-scrollbar{display:none}
+.pill{
+  flex:none;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;
+  text-transform:uppercase;color:var(--muted);background:var(--wash);
+  border:1px solid transparent;border-radius:999px;padding:8px 14px;cursor:pointer;
+}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.pill:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.pill i{font-style:normal;opacity:.55;margin-left:6px;font-variant-numeric:tabular-nums}
+.dock-div{flex:none;width:1px;background:var(--hair);margin-block:4px}
 
-      <!-- Pipeline Status Categories -->
-      <div class="home-section">
-        <div class="home-section-title">Outreach Pipeline</div>
-        <div class="cat-list" id="status-cats"></div>
-      </div>
+/* ── sheets ──────────────────────────────── */
+dialog{
+  position:fixed;inset:auto 0 0 0;margin:0 auto;
+  border:0;padding:0;max-width:720px;width:100%;
+  background:transparent;max-height:100dvh;
+}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.sheet{
+  background:var(--paper);color:var(--ink);
+  border-radius:18px 18px 0 0;border-top:1px solid var(--hair);
+  max-height:92dvh;overflow-y:auto;overscroll-behavior:contain;
+  padding:0 16px calc(20px + env(safe-area-inset-bottom));
+  animation:rise .22s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes rise{from{transform:translateY(14px);opacity:.6}to{transform:none;opacity:1}}
+.grab{width:38px;height:4px;border-radius:2px;background:var(--edge);margin:10px auto 4px}
+.sheet-head{position:sticky;top:0;background:var(--paper);padding-top:6px;padding-bottom:12px;z-index:2}
+.sheet h2{margin:0;font-size:19px;font-weight:700;letter-spacing:-.015em;line-height:1.25;text-wrap:balance}
+.sheet-sub{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--faint);margin-top:5px;
+}
+.sheet-addr{font-size:13.5px;color:var(--muted);margin:10px 0 0}
+.sheet-tel{
+  display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums;
+  margin:14px 0 0;letter-spacing:.01em;color:var(--ink);
+  background:transparent;border:0;padding:0;cursor:pointer;text-align:left;
+}
+.sheet-tel:active{opacity:.6}
+.sheet-tel:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.copyhint{
+  font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--faint);
+}
+.warnline{font-family:var(--mono);font-size:11px;letter-spacing:.03em;color:var(--faint);margin:6px 0 0}
+.angle{
+  font-size:13.5px;line-height:1.5;color:var(--ink);margin:12px 0 0;
+  padding:11px 12px;background:var(--wash);border-radius:10px;
+}
+.alt{margin:8px 0 0;font-family:var(--mono);font-size:13px}
+.alt a{color:var(--ink)}
+.alt span{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-left:8px}
 
-      <!-- Business Categories -->
-      <div class="home-section">
-        <div class="home-section-title">Industries & Categories</div>
-        <div class="cat-list" id="segment-cats"></div>
-      </div>
+.big{display:grid;gap:9px;margin-top:16px}
+.big.two{grid-template-columns:1fr 1fr}
+.tap{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  min-height:52px;border-radius:12px;font-size:15px;font-weight:600;
+  text-decoration:none;cursor:pointer;border:1px solid var(--edge);
+  background:transparent;color:var(--ink);
+}
+.tap-solid{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tap:active{transform:scale(.985)}
+.tap:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
-      <!-- Upload zone (shown when no leads) -->
-      <div class="home-upload" id="home-upload" style="display:none">
-        <div class="upload-zone" id="upload-zone">
-          <div class="upload-zone-inner">
-            <div class="upload-icon">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            </div>
-            <h2>Import your leads</h2>
-            <p>Drop a CSV or Excel file, or tap to browse</p>
-          </div>
-        </div>
-        <input type="file" id="file-input" accept=".csv,.xlsx,.xls" hidden>
-      </div>
-    </div>
-  </section>
+.block{margin-top:22px}
+.cap{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--faint);margin:0 0 9px;
+}
+.states{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.state{
+  font-size:13px;font-weight:500;padding:11px 10px;border-radius:10px;
+  background:var(--wash);border:1px solid transparent;color:var(--muted);cursor:pointer;
+}
+.state[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.state:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
-  <!-- ═══ Leads View ═══════════════════════════ -->
-  <section id="leads-view" class="view">
-    <div class="leads-header">
-      <button class="back-btn" id="leads-back" title="Back to Home">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+.pad{
+  width:100%;font-size:14.5px;line-height:1.5;color:var(--ink);
+  background:var(--wash);border:1px solid transparent;border-radius:10px;
+  padding:11px 12px;min-height:84px;resize:vertical;
+}
+.pad:focus{outline:none;border-color:var(--ink);background:var(--paper)}
+.pad::placeholder{color:var(--faint)}
+
+.quote{
+  font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--muted);
+  background:var(--wash);border-radius:10px;padding:12px;
+}
+details.peek summary{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--faint);cursor:pointer;list-style:none;padding-block:4px;
+}
+details.peek summary::-webkit-details-marker{display:none}
+details.peek summary::after{content:" \25BE"}
+details.peek[open] summary::after{content:" \25B4"}
+details.peek .quote{margin-top:9px}
+
+.line{
+  width:100%;font-size:15px;color:var(--ink);background:var(--wash);
+  border:1px solid transparent;border-radius:10px;padding:11px 12px;
+}
+.line:focus{outline:none;border-color:var(--ink);background:var(--paper)}
+.switch{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ghostbtn{
+  width:100%;min-height:46px;border-radius:10px;border:1px solid var(--edge);
+  background:transparent;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer;
+}
+.ghostbtn:active{background:var(--wash)}
+.ghostbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tiny{font-size:12.5px;color:var(--faint);line-height:1.5;margin:9px 0 0}
+.tiny code{font-family:var(--mono);font-size:11px;background:var(--wash);padding:1px 5px;border-radius:4px}
+
+.note{
+  position:fixed;left:50%;bottom:calc(var(--bar) + 18px + env(safe-area-inset-bottom));
+  transform:translateX(-50%);background:var(--ink);color:var(--paper);
+  font-size:13px;padding:11px 16px;border-radius:10px;z-index:60;
+  max-width:calc(100% - 32px);
+}
+</style>
+
+<header class="top">
+  <div class="hold">
+    <div class="top-row">
+      <h1 class="title">Trades</h1>
+      <span class="count" id="count">&nbsp;</span>
+      <button class="icon-btn" id="open-set" type="button" aria-label="Settings">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5v.2a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H2a2 2 0 110-4h.1A1.7 1.7 0 003.6 9a1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H8a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1h.2a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
       </button>
-      <div class="leads-title-box">
-        <h2 class="leads-title" id="leads-title">All Leads</h2>
-        <span class="leads-filter-pill" id="leads-filter-pill" style="display:none"></span>
+    </div>
+  </div>
+  <div class="rule"><span id="rule"></span></div>
+  <div class="hold find">
+    <input id="find" type="search" placeholder="Search name, area or notes" autocomplete="off" aria-label="Search">
+  </div>
+</header>
+
+<main class="hold rows" id="rows"></main>
+
+<nav class="dock" aria-label="Filters"><div class="dock-scroll" id="dock"></div></nav>
+
+<dialog id="lead-sheet"><div class="sheet" id="lead-body"></div></dialog>
+<dialog id="set-sheet"><div class="sheet" id="set-body"></div></dialog>
+
+<script>
+const LEADS_RAW = [{"n":"New Navin Enterprises Ltd.","p":"0772422775","c":"Hardware store","a":"Mbarara","s":"Plumbing","r":22,"y":"High","d":"9MV6+RGJ, Makhan singh street","w":0},{"n":"Apollo Hardware","p":"0702195642","c":"Hardware store","a":"Jinja","s":"Plumbing","r":20,"y":"High","d":"C6H7+P4J, Oboja Rd","w":0},{"n":"Genius plumbing services and contractors","p":"0754351876","c":"Plumber","a":"Kampala","s":"Plumbing","r":19,"y":"Medium","d":"Bawalakata Rd","w":0},{"n":"L.A house of plumbing","p":"0789097468","c":"Plumber","a":"Entebbe","s":"Plumbing","r":17,"y":"Medium","d":"","w":0},{"n":"Lonas engineering works (U) ltd","p":"0770582617","c":"Construction company","a":"Jinja","s":"Plumbing","r":17,"y":"Medium","d":"Busoga house, Main St","w":0},{"n":"Barya Hardware","p":"0701530793","c":"Hardware store","a":"Mbarara","s":"Plumbing","r":13,"y":"Medium","d":"9MX7+288","w":0},{"n":"Patwin plumbing solutions co.Ltd","p":"0757228801","c":"Plumber","a":"Kampala","s":"Plumbing","r":13,"y":"Medium","d":"near bahai temple","w":0},{"n":"WAMPAMBA MODERN PLUMBERS","p":"0776616997","c":"Plumber","a":"Kampala","s":"Plumbing","r":7,"y":"Medium","d":"","w":0},{"n":"Jemo Solutions Plumbing Store","p":"0787577983","c":"Hardware store","a":"Soroti","s":"Plumbing","r":6,"y":"Medium","d":"Market Ln","w":0},{"n":"Klean plumbers Kampala Ug","p":"0701748090","c":"Plumber","a":"Kampala","s":"Plumbing","r":6,"y":"Medium","d":"","w":0},{"n":"SJ CONSTRUCTIONS COMPANY LTD","p":"0701984034","c":"Construction company","a":"Entebbe","s":"Plumbing","r":6,"y":"Medium","d":"mayors gardens","w":0},{"n":"STRUFIX CONTRACTORS (U) LTD","p":"0777702745","c":"Construction company","a":"Soroti","s":"Plumbing","r":6,"y":"Medium","d":"Plot 8, Akisim Road","w":0},{"n":"Ave Maria Hardware","p":"0785737081","c":"Plumbing supply store","a":"Fort Portal","s":"Plumbing","r":5,"y":"Medium","d":"Kahiju Fort Portal","w":0},{"n":"BAWA PLUMBING SOLUTIONS JINJA CITY UGANDA","p":"0701035384","c":"Plumber","a":"Jinja","s":"Plumbing","r":5,"y":"Medium","d":"Central Market, Alidina Rd","w":0},{"n":"God's plan plumbing shop","p":"0781078628","c":"Plumbing supply store","a":"Mbarara","s":"Plumbing","r":5,"y":"Medium","d":"","w":0},{"n":"TIM PLUMBERS","p":"0706775233","c":"Plumber","a":"Jinja","s":"Plumbing","r":5,"y":"Medium","d":"Entebbe road Kawuku-nakawuka road","w":0},{"n":"AVAILABLE PLUMBERS UG","p":"0726050233","c":"Plumber","a":"Jinja","s":"Plumbing","r":4,"y":"Low","d":"","w":0},{"n":"BUM PLUMBING AND WATER SYSTEMS COMPANY (U) LTD","p":"0706750821","c":"Corporate office","a":"Jinja","s":"Plumbing","r":4,"y":"Low","d":"Pilkington Rd","w":0},{"n":"H & RAY PLUMBING CENTER","p":"0777106906","c":"Hardware store","a":"Fort Portal","s":"Plumbing","r":4,"y":"Low","d":"mukitembe Road","w":0},{"n":"Biodigester Kings Uganda","p":"0757870378","c":"Construction company","a":"Entebbe","s":"Plumbing","r":3,"y":"Low","d":"Kasenyi Road","w":0},{"n":"Bum Plumbing And Home Water Systems Co. (U) ltd","p":"0706032860","c":"Water works","a":"Jinja","s":"Plumbing","r":3,"y":"Low","d":"8HXM+22M","w":0},{"n":"Geem Plumbing solutions","p":"0703644825","c":"Plumber","a":"Kampala","s":"Plumbing","r":3,"y":"Low","d":"Ebenezer Cl","w":0},{"n":"JK NAPOLEON PLUMBING SOLUTIONS","p":"0741856326","c":"Plumbing supply store","a":"Jinja","s":"Plumbing","r":3,"y":"Low","d":"Market Square Rd","w":0},{"n":"KANDE SENIOR PLUMBERS","p":"0752679920","c":"Plumber","a":"Entebbe","s":"Plumbing","r":3,"y":"Low","d":"2FX7+6F8","w":0},{"n":"Master Plumbers","p":"0702446870","c":"Plumber","a":"Jinja","s":"Plumbing","r":3,"y":"Low","d":"Namasuba Entebbe rd","w":0},{"n":"MUHOOLI PLUMBING SERVICES","p":"0708899021","c":"Plumber","a":"Kampala","s":"Plumbing","r":3,"y":"Low","d":"Sentema Rd","w":0},{"n":"Ozarks Engineering Ltd","p":"0780947075","c":"General contractor","a":"Kampala","s":"Plumbing","r":3,"y":"Low","d":"Kavulu Cl","w":0},{"n":"Cosmopolitan Engineering Services Limited","p":"0777555448","c":"Construction company","a":"Arua","s":"Plumbing","r":2,"y":"Low","d":"Plot 12","w":0},{"n":"Cw plumbing services","p":"0787020621","c":"Plumbing supply store","a":"Kampala","s":"Plumbing","r":2,"y":"Low","d":"bukasa zone","w":0},{"n":"Drainage Cleaning Plumbers Kampala","p":"0702869147","c":"Training center","a":"Jinja","s":"Plumbing","r":2,"y":"Low","d":"Kampala Rd","w":0},{"n":"Five Star Plumbers Limited","p":"0778500575","c":"Irrigation equipment supplier","a":"Jinja","s":"Plumbing","r":2,"y":"Low","d":"Penn Station, 7th street","w":0},{"n":"Gestic Technical Services/Plumbers {GTS}","p":"0703175061","c":"Plumber","a":"Mbarara","s":"Plumbing","r":2,"y":"Low","d":"","w":0},{"n":"K51 plumbing solutions","p":"0755107451","c":"Plumber","a":"Kampala","s":"Plumbing","r":2,"y":"Low","d":"Luwum St","w":0},{"n":"LOBE BUILDER'S POINT LIMITED (HARDWARE SHOP)","p":"0759234998","c":"Plumber","a":"Kampala","s":"Plumbing","r":2,"y":"Low","d":"Kamuli Rd","w":0},{"n":"NXT CONSTRUCTION COMPANY","p":"0786768872","c":"Construction company","a":"Entebbe","s":"Plumbing","r":2,"y":"Low","d":"Bunono","w":0},{"n":"Plaza Plumbing Suppliers Ltd (Fortportal)","p":"0759771784","c":"Building materials supplier","a":"Fort Portal","s":"Plumbing","r":2,"y":"Low","d":"Bwamba Rd","w":0},{"n":"Plumbing World Kiteezi","p":"0757788413","c":"Plumber","a":"Jinja","s":"Plumbing","r":2,"y":"Low","d":"","w":0},{"n":"RAYMON PLUMBING CONTRACTORS","p":"0702687033","c":"Water works","a":"Mbarara","s":"Plumbing","r":2,"y":"Low","d":"Mbarara and country wide","w":0},{"n":"Smart plumbers and water solution ltd","p":"0751474537","c":"Plumber","a":"Jinja","s":"Plumbing","r":2,"y":"Low","d":"NDEJJE LUFUKA","w":0},{"n":"V& S Plumbers","p":"0750485062","c":"Plumber","a":"Kampala","s":"Plumbing","r":2,"y":"Low","d":"1800 Namilyango Rd","w":0},{"n":"WATERPOL PLUMBING SERVICES LTD","p":"0753884041","c":"Plumbing supply store","a":"Jinja","s":"Plumbing","r":2,"y":"Low","d":"Nabugabo Road","w":0},{"n":"Wilbert Hardware And Interior Designers","p":"0778304640","c":"Hardware store","a":"Mbarara","s":"Plumbing","r":2,"y":"Low","d":"Cleveland road Mbarara City North","w":0},{"n":"Zimshafpy plumber","p":"0701147495","c":"Plumber","a":"Jinja","s":"Plumbing","r":2,"y":"Low","d":"","w":0},{"n":"Alemaant investments ltd","p":"0757714864","c":"General contractor","a":"Jinja","s":"Plumbing","r":1,"y":"Low","d":"Cathedral road Bugembe","w":0},{"n":"Apex proficient plumbing and irregation services","p":"0702291176","c":"Appliance parts supplier","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"office road, Bweyogere kiringa @ wakiso, Kito LC 1 Rd","w":0},{"n":"Capital Plumbers U Ltd","p":"0752891167","c":"Plumber","a":"Jinja","s":"Plumbing","r":1,"y":"Low","d":"Mawanda Road Kamwokya","w":0},{"n":"Cream General and Technical Services Ltd.","p":"0779549211","c":"Construction company","a":"Mbarara","s":"Plumbing","r":1,"y":"Low","d":"Plot 49, Kitunzi, Kakyeka Rd","w":0},{"n":"Crew engineering services ltd","p":"0702590747","c":"Plumber","a":"Mbarara","s":"Plumbing","r":1,"y":"Low","d":"","w":0},{"n":"Flux engineering and technical services","p":"0751835670","c":"Plumber","a":"Mukono","s":"Plumbing","r":1,"y":"Low","d":"Mukono","w":0},{"n":"H2O plumbers.ug","p":"0744532297","c":"Plumber","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"kitunzi","w":0},{"n":"IDEAL PLUMBERS CO LTD","p":"0755284850","c":"Plumber","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"Kasangati Road Near Kira Roundabout","w":0},{"n":"Induct Amptech Limited","p":"0753863490","c":"Construction company","a":"Jinja","s":"Plumbing","r":1,"y":"Low","d":"Main St","w":0},{"n":"JAMES PLUMBERS","p":"0700915478","c":"Plumbing supply store","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"Kikajjo Rd","w":0},{"n":"JJ PLUMBING SERVICES","p":"0708400706","c":"Plumber","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"","w":0},{"n":"Kamuli Sustainable Energy Company Limited (KASECO)","p":"0787239052","c":"Plumber","a":"Jinja","s":"Plumbing","r":1,"y":"Low","d":"","w":0},{"n":"KASIM PLUMBING SERVICES LTD","p":"0756256495","c":"Plumber","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"KIWANGA","w":0},{"n":"Kiasan Tech & Plumbing \"U\" Ltd","p":"0701913438","c":"Plumber","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"opposite vivo energies, Eighth St","w":0},{"n":"Kyeyune Plumbing Hardware","p":"0783064507","c":"Plumber","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"","w":0},{"n":"Mahad Plumbing Services","p":"0703434980","c":"Plumbing supply store","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"Jambula","w":0},{"n":"Mahi Plumbing Suppliers Ltd","p":"0709163159","c":"Hardware store","a":"Jinja","s":"Plumbing","r":1,"y":"Low","d":"14a Kibira Rd","w":0},{"n":"MAMERI WILS ENGINEERING LTD","p":"0776829918","c":"Construction company","a":"Gulu","s":"Plumbing","r":1,"y":"Low","d":"Q7FQ+P7","w":0},{"n":"Mini Price Interiors","p":"0747578338","c":"Plumbing supply store","a":"Mbarara","s":"Plumbing","r":1,"y":"Low","d":"Mackansigh St","w":0},{"n":"Mugish Art Point Services","p":"0782537418","c":"Construction company","a":"Arua","s":"Plumbing","r":1,"y":"Low","d":"Rhino Camp Rd","w":0},{"n":"OM GENERAL HARDWARE LTD","p":"0706292920","c":"Plumbing supply store","a":"Mukono","s":"Plumbing","r":1,"y":"Low","d":"Namanve Industrial Park","w":0},{"n":"Omillan multi- services ltd","p":"0706089000","c":"Construction company","a":"Jinja","s":"Plumbing","r":1,"y":"Low","d":"Gokhale Rd","w":0},{"n":"Painter's and Plumber's world","p":"0772864949","c":"Home builder","a":"Jinja","s":"Plumbing","r":1,"y":"Low","d":"8G9R+3P6","w":0},{"n":"Steamfitterplumbers co.ltd","p":"0756872100","c":"Plumber","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"kitunzi","w":0},{"n":"STS WATER SOLUTIONS","p":"0702892059","c":"Plumber","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"","w":0},{"n":"Surefix Plumbers ug","p":"0789855237","c":"Plumber","a":"Kampala","s":"Plumbing","r":1,"y":"Low","d":"Bulabira Rd","w":0},{"n":"Twoplex Design and Construction Ltd","p":"0789613991","c":"Construction company","a":"Gulu","s":"Plumbing","r":1,"y":"Low","d":"","w":0},{"n":"William Plumbing Corner","p":"0776352307","c":"Plumbing supply store","a":"Jinja","s":"Plumbing","r":1,"y":"Low","d":"Kampala Trade Center Building","w":0},{"n":"Willis plumbing solutions","p":"0787882779","c":"Plumber","a":"Jinja","s":"Plumbing","r":1,"y":"Low","d":"Bugema","w":0},{"n":"24HOURS PLUMBING","p":"0775192751","c":"Plumber","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"ARTEMIS WORKS UG LTD","p":"0772504301","c":"Plumbing supply store","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Atuhwere Plumbers Ltd","p":"0789557576","c":"Plumber","a":"Kampala","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"BOKES PLUMBING HARDWARE","p":"0772292610","c":"Plumbing supply store","a":"Lira","s":"Plumbing","r":0,"y":"Low","d":"Plot 24 Aroma Lane","w":0},{"n":"Brizzy plumbing company","p":"0757195824","c":"Plumber","a":"Kampala","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"BUM PLUMBING & WATER SYSTEMS Co. (U) Ltd","p":"0771690927","c":"Corporate office","a":"Mbarara","s":"Plumbing","r":0,"y":"Low","d":"Pilkington Road","w":0},{"n":"Chap city plumbing solutions","p":"0756293282","c":"Plumber","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Lunnyo","w":0},{"n":"EBERAH","p":"0786990972","c":"Handyman","a":"Lira","s":"Plumbing","r":0,"y":"Low","d":"Kirimbe north B","w":0},{"n":"Ediart creative solution","p":"0755695600","c":"Construction company","a":"Gulu","s":"Plumbing","r":0,"y":"Low","d":"Acholi Rd","w":0},{"n":"EGONGA PLUMBING SOLUTIONS- IGANGA","p":"0759776500","c":"Plumber","a":"Iganga","s":"Plumbing","r":0,"y":"Low","d":"IGANGA- NAKALAMA, VIA TIRINYI ROAD","w":0},{"n":"Erycom Plumbing Services","p":"0787853377","c":"Plumbing supply store","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"EZEK CONTRACTORS LIMITED","p":"0785250276","c":"Construction company","a":"Tororo","s":"Plumbing","r":0,"y":"Low","d":"Osukuru along, Busia - Tororo","w":0},{"n":"F & J PLUMBERS UGANDA LTD","p":"0770303317","c":"Civil engineering company","a":"Mbarara","s":"Plumbing","r":0,"y":"Low","d":"Bucunku Road","w":0},{"n":"Finest Plumbing Store","p":"0702727574","c":"Store","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"8H8J+3JH","w":0},{"n":"Fs plumbing services","p":"0781885696","c":"Plumber","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Genesis Plumbing SOLNS","p":"0707092448","c":"Plumber","a":"Mbarara","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Innovation plumbing shop","p":"0786772166","c":"Plumber","a":"Soroti","s":"Plumbing","r":0,"y":"Low","d":"Opposite police barracks, old bus park","w":0},{"n":"Jab Concepts Ltd","p":"0772054064","c":"Construction company","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Kampala Road","w":0},{"n":"JIM-TECH ENGINEERS' LTD","p":"0785984304","c":"Construction company","a":"Soroti","s":"Plumbing","r":0,"y":"Low","d":"market","w":0},{"n":"JIMTEX MASTER PLUMBERS & BIO DIGESTER ENTEBBE","p":"0756034059","c":"Plumber","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Kabale Road","w":0},{"n":"Joseph plumbing and tiling solutions","p":"0780587031","c":"Plumber","a":"Kampala","s":"Plumbing","r":0,"y":"Low","d":"Kakajjo","w":0},{"n":"Jvt expert plumbers","p":"0746314996","c":"Engineering consultant","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"3F6F+X4W","w":0},{"n":"KAREVER PLUMBERS","p":"0752176664","c":"Plumbing supply store","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Bwerenga Rd","w":0},{"n":"Loyal plumbers Entebbe in","p":"0760385384","c":"Plumber","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Kampla Entebbe","w":0},{"n":"LUKANGA PLUMBING SERVICES","p":"0703414494","c":"Plumber","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Entebbe Rd - Kawuku - Nakawuka Rd","w":0},{"n":"Lule Ronald (plumbing services)","p":"0782342014","c":"Social services organization","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"M & N PLUMBERS","p":"0706815515","c":"Plumber","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"0000","w":0},{"n":"MAC'DONALDS HARDWARES","p":"0786593152","c":"Plumbing supply store","a":"Soroti","s":"Plumbing","r":0,"y":"Low","d":"Popatlal road Solot avenue","w":0},{"n":"mass plumbing and tiles hardware lira","p":"0777882507","c":"Plumbing supply store","a":"Lira","s":"Plumbing","r":0,"y":"Low","d":"Olwol Rd","w":0},{"n":"MatovuFrank","p":"0756984300","c":"Plumber","a":"Kampala","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"MIAH PLUMBING SERVICES","p":"0785410042","c":"Plumber","a":"Kampala","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Misanvu Constructions & Works","p":"0759377292","c":"Plumber","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"MJ CONSTRUCTION COMPANY","p":"0756639088","c":"Construction company","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Nkumba","w":0},{"n":"Modern ceramics, Tiles & plumbing outlet","p":"0784130953","c":"Plumber","a":"Mbarara","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Mubra Plumbing Solutions Ltd","p":"0753156261","c":"Plumber","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"MULTI STAR PLUMBERS","p":"0701809065","c":"Plumbing supply store","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"9PF6+8CG, Bukerere Rd","w":0},{"n":"Mutaho civil and electrical engineering company ltd","p":"0772582608","c":"Construction company","a":"Mbarara","s":"Plumbing","r":0,"y":"Low","d":"Adit building, Mbarara - Masaka Rd","w":0},{"n":"Ngobya Technical Services","p":"0702324327","c":"Plumber","a":"Kampala","s":"Plumbing","r":0,"y":"Low","d":"Kireka Kampala","w":0},{"n":"O' GUZI PLUMBING SOLUTIONS","p":"0786685628","c":"Consultant","a":"Lira","s":"Plumbing","r":0,"y":"Low","d":"LORO, Oyam Rd","w":0},{"n":"Palca plumbing shop","p":"0780141635","c":"Plumbing supply store","a":"Gulu","s":"Plumbing","r":0,"y":"Low","d":"Bank Ln","w":0},{"n":"PATEK BER TRADERS","p":"0779938116","c":"Plumbing supply store","a":"Gulu","s":"Plumbing","r":0,"y":"Low","d":"queens avenue","w":0},{"n":"Patrick plumbing solutions","p":"0703648473","c":"Plumbing supply store","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Busambaga Rd","w":0},{"n":"Perez Excel Plumbing Shop and Services","p":"0789531815","c":"Plumbing supply store","a":"Mbarara","s":"Plumbing","r":0,"y":"Low","d":"Kiyanja Kamukuzi Division","w":0},{"n":"PIUSTIC CONSTRUCTION AND COMPOUND DESIGNERS","p":"0776408470","c":"Construction company","a":"Mbarara","s":"Plumbing","r":0,"y":"Low","d":"Ankole and surrounding regions","w":0},{"n":"Plop Plumbing Services","p":"0708137223","c":"Plumber","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"PLUMBER'S JOY STORE","p":"0772508657","c":"Home builder","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"central ring road","w":0},{"n":"PLUMBERS ARENA","p":"0753119807","c":"Plumbing supply store","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"Mukono, Jinja road seeta","w":0},{"n":"PrimeLine Plumbing","p":"0790897090","c":"Plumbing supply store","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"Namugongo, 25625","w":0},{"n":"Quality plumbers Kampala Uganda","p":"0760703005","c":"Plumbing supply store","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"9JV6+576, Kungu Road","w":0},{"n":"Quality Plumbing Shop","p":"0704238268","c":"Plumber","a":"Mbarara","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Quantum Infrastructure Consultants","p":"0773929101","c":"Plumber","a":"Gulu","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Shafik plumbing services kyegegwa","p":"0777135251","c":"Plumbing supply store","a":"Fort Portal","s":"Plumbing","r":0,"y":"Low","d":"Kyegegwa","w":0},{"n":"Sight two business link","p":"0752584861","c":"Plumber","a":"Iganga","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Sj classy plumbers","p":"0759597946","c":"Plumber","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Smart Choice Plumber","p":"0759427714","c":"Plumber","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"Kakoola, Ndejje Rd","w":0},{"n":"SmartLink infrastructure and utilities","p":"0766051267","c":"Plumber","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Lulongo buwaya Katabi","w":0},{"n":"Smith Construction Consultancy Agency","p":"0700304212","c":"Construction company","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Nkumba, Kasenyi Road","w":0},{"n":"Sovy Engineering works","p":"0774620255","c":"Plumber","a":"Lira","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Ssenyonyi Graceline Construction Ltd","p":"0751500791","c":"Construction company","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Entebbe Division B","w":0},{"n":"Ssozi construction and plumbing company ltd","p":"0789161721","c":"Construction company","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"Kawuku Entebbe road","w":0},{"n":"Tile fixers Entebbe","p":"0755022242","c":"Plumber","a":"Entebbe","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Timo plumbing services","p":"0703833469","c":"Construction company","a":"Kampala","s":"Plumbing","r":0,"y":"Low","d":"bombay Kirinya-Bukasa Road","w":0},{"n":"Tonka Construction Company Limited","p":"0752501512","c":"Construction company","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"C6M7+R28, Main St","w":0},{"n":"Trust plumbing service center","p":"0705719437","c":"Hardware store","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"Jinja, Iganga, Kaliro","w":0},{"n":"Tushak Technical Services Ltd","p":"0775001924","c":"Construction company","a":"Mbarara","s":"Plumbing","r":0,"y":"Low","d":"NYAMITANGA DIVISION, KATETE","w":0},{"n":"UgaFIX","p":"0756355785","c":"Plumber","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"Wap plumbing services","p":"0755384347","c":"Plumbing supply store","a":"Kampala","s":"Plumbing","r":0,"y":"Low","d":"Old Butabika Rd","w":0},{"n":"WATER TECH PLUMBING CONTRACTORS","p":"0781469952","c":"Plumbing supply store","a":"Soroti","s":"Plumbing","r":0,"y":"Low","d":"Soroti- Dokolo Road","w":0},{"n":"WB CONSTRUCTION AND FINISHING SERVICES","p":"0774843383","c":"Plumber","a":"Jinja","s":"Plumbing","r":0,"y":"Low","d":"","w":0},{"n":"William plumbing tools","p":"0775064022","c":"Water treatment supplier","a":"Mbarara","s":"Plumbing","r":0,"y":"Low","d":"Central street","w":0}];
+
+const CC = '256';
+const STATES = ['Not called','No answer','Call back','Interested','Not interested','Meeting booked','Won','Lost'];
+const WARM = ['Interested','Meeting booked','Won'];
+
+const TEXTS = {
+  School: {
+    cold:
+`Hi, my name is {me}. I build websites for schools here in Kampala.
+
+I found {name} on Google Maps and saw there's no website on the listing. Most parents check online before they choose a school these days, so I thought I'd ask.
+
+Would you like me to make you a free sample page? Just the school name, a few photos, the classes you offer and how parents can reach you. You don't pay anything for it. If you like what you see we can improve it from there, and if not, no problem at all.
+
+Let me know.`,
+    warm:
+`Hi, this is {me}. We spoke on the phone earlier about a website for {name}.
+
+Like I said, I'll put together a free sample page so you can see how it would look. Nothing to pay and no commitment.
+
+Could you send me a few photos of the school and the classes you offer? I should have something to show you in two or three days.`
+  },
+  Training: {
+    cold:
+`Hi, my name is {me}. I build websites for colleges and training institutes here in Kampala.
+
+I found {name} on Google Maps and saw there's no website on the listing. Anyone looking for a course will search online and compare a few places before they decide, so I thought I'd ask.
+
+Would you like me to make you a free sample page? The courses you offer, when the next intake starts and how people can reach you. You don't pay anything for it. If you like what you see we can improve it from there, and if not, no problem at all.
+
+Let me know.`,
+    warm:
+`Hi, this is {me}. We spoke earlier about a website for {name}.
+
+Like I said, I'll put together a free sample page so you can see how it would look. Nothing to pay and no commitment.
+
+Could you send me the list of courses and when the next intake starts? I should have something to show you in two or three days.`
+  },
+  Consultancy: {
+    cold:
+`Hi, my name is {me}. I build websites for businesses here in Kampala.
+
+I found {name} on Google Maps and saw there's no website on the listing. Most people look a firm up online before they call, so I thought I'd ask.
+
+Would you like me to make you a free sample page? What you do, the services you offer and your contact details. You don't pay anything for it. If you like what you see we can improve it from there, and if not, no problem at all.
+
+Let me know.`,
+    warm:
+`Hi, this is {me}. We spoke earlier about a website for {name}.
+
+Like I said, I'll put together a free sample page so you can see how it would look. Nothing to pay and no commitment.
+
+Could you tell me the main services you'd want on it? I should have something to show you in two or three days.`
+  },
+  Church: {
+    cold:
+`Hi, my name is {me}. I build websites for churches here in Kampala.
+
+I found {name} on Google Maps and saw there's no website on the listing. People who are new to {area} usually search online to find service times and how to get there, so I thought I'd ask.
+
+If it would help, I can make you a free sample page. Service times, directions and a little about the church. You don't pay anything for it.
+
+Let me know what you think.`,
+    warm:
+`Hi, this is {me}. We spoke earlier about a website for {name}.
+
+Like I said, I'll put together a free sample page so you can see how it would look. Nothing to pay and no commitment.
+
+Could you confirm your service times and send me a photo or two? I should have something to show you in two or three days.`
+  }
+};
+TEXTS.Plumbing = {
+  cold:
+`Hi, my name is {me}. I build websites for small businesses here in Uganda.
+
+I found {name} on Google Maps and saw there's no website on the listing. When someone has a burst pipe they search on their phone and ring whoever looks most serious, so even a simple page with your work and your number can win you those jobs.
+
+Would you like me to make you a free sample page? Your services, a few photos of work you've done, the areas you cover and your number. You don't pay anything for it. If you like what you see we can improve it from there, and if not, no problem at all.
+
+Let me know.`,
+  warm:
+`Hi, this is {me}. We spoke earlier about a website for {name}.
+
+Like I said, I'll put together a free sample page so you can see how it would look. Nothing to pay and no commitment.
+
+Could you send me a few photos of jobs you've done and the areas you cover? I should have something to show you in two or three days.`
+};
+TEXTS.Other = TEXTS.Consultancy;
+
+// Schools serve parents. Colleges and vocational institutes serve adults
+// choosing a course, which is a different reason to be online.
+const TRAINING_RE = /college|universit|vocational|training|institute|skills|adult|aviation|management school/i;
+
+const leads = LEADS_RAW.map((l, i) => ({
+  ...l,
+  key: l.p || ('x' + i),
+  mobile: /^0?7[0-9]/.test(l.p || ''),
+}));
+
+let log = {};
+let cfg = { me: 'David', mode: 'cold', texts: {} };
+let seg = 'All', state = 'All', find = '';
+let openKey = null;
+
+const $ = id => document.getElementById(id);
+const rowsEl = $('rows'), dockEl = $('dock');
+const leadDlg = $('lead-sheet'), leadBody = $('lead-body');
+const setDlg = $('set-sheet'), setBody = $('set-body');
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const waNum = p => CC + p.replace(/^0/, '');
+const telNum = p => '+' + CC + p.replace(/^0/, '');
+const pretty = p => p.length === 10 ? p.replace(/^(\d{4})(\d{3})(\d{3})$/, '$1 $2 $3') : p;
+const rec = k => log[k] || { status: 'Not called', notes: '' };
+const byKey = k => leads.find(l => l.key === k);
+
+function kind(l) {
+  if (l.s === 'School') return TRAINING_RE.test(l.c + ' ' + l.n) ? 'Training' : 'School';
+  return TEXTS[l.s] ? l.s : 'Other';
+}
+function textFor(l, mode) {
+  const m = mode || cfg.mode, k = kind(l);
+  const saved = cfg.texts[k + ':' + m];
+  const body = (typeof saved === 'string' && saved.trim()) ? saved : TEXTS[k][m];
+  return body.replace(/\{me\}/g, cfg.me || 'David')
+             .replace(/\{name\}/g, l.n)
+             .replace(/\{area\}/g, l.a || 'the area');
+}
+const mapsUrl = l => 'https://www.google.com/maps/search/' + encodeURIComponent(l.n + ' ' + l.d + ' Kampala Uganda');
+
+/* ── storage ───────────────────────────── */
+const K_LOG = 'kcs_log_v1', K_CFG = 'kcs_cfg_v1';
+const readJSON = (k, f) => { try { return JSON.parse(localStorage.getItem(k)) || f; } catch (_) { return f; } };
+const writeJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} };
+
+function saveCall() { writeJSON(K_LOG, log); }
+function saveCfg()  { writeJSON(K_CFG, cfg); }
+
+/* ── icons ─────────────────────────────── */
+const I_PHONE = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg>';
+const I_WA = '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.2-1.8-.9-2-1s-.5-.1-.7.1-.8 1-.9 1.2-.4.2-.6.1a8.1 8.1 0 01-2.4-1.5 9 9 0 01-1.7-2c-.1-.3 0-.5.2-.6l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4a3.4 3.4 0 00-1 2.5 5.9 5.9 0 001.2 3.1 13.5 13.5 0 005.1 4.5 8 8 0 003.5.7c.6-.1 1.8-.7 2-1.4s.3-1.3.2-1.4zM12 21.8a9.9 9.9 0 01-5-1.4l-.4-.2-3.7 1 1-3.6-.3-.4A9.9 9.9 0 012.2 12a9.9 9.9 0 019.9-9.9 9.8 9.8 0 017 2.9 9.8 9.8 0 012.9 7 9.9 9.9 0 01-9.9 9.8zM20.5 3.5A11.8 11.8 0 0012 0 11.9 11.9 0 00.2 11.9a11.8 11.8 0 001.6 5.9L0 24l6.3-1.7A11.9 11.9 0 0012 23.8 11.9 11.9 0 0023.9 12a11.8 11.8 0 00-3.4-8.5z"/></svg>';
+const I_PIN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+const I_NEXT = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
+
+/* ── list ──────────────────────────────── */
+function shown() {
+  const q = find.trim().toLowerCase();
+  return leads.filter(l => {
+    if (seg !== 'All' && l.s !== seg) return false;
+    if (state !== 'All' && rec(l.key).status !== state) return false;
+    if (!q) return true;
+    return (l.n + ' ' + l.c + ' ' + l.a + ' ' + l.d + ' ' + rec(l.key).notes).toLowerCase().includes(q);
+  });
+}
+
+function paintCount() {
+  const done = leads.filter(l => rec(l.key).status !== 'Not called').length;
+  const warm = leads.filter(l => WARM.includes(rec(l.key).status)).length;
+  $('count').innerHTML = `<b>${done}</b>/${leads.length}${warm ? ` &middot; <b>${warm}</b> warm` : ''}`;
+  $('rule').style.width = (done / leads.length) * 100 + '%';
+}
+
+function paintDock() {
+  const segs = ['All', ...new Set(leads.map(l => l.s))];
+  const used = STATES.filter(s => leads.some(l => rec(l.key).status === s));
+  let html = segs.map(s =>
+    `<button class="pill" type="button" aria-pressed="${s === seg}" data-seg="${esc(s)}">${esc(s === 'All' ? 'All' : s)}<i>${s === 'All' ? leads.length : leads.filter(l => l.s === s).length}</i></button>`
+  ).join('');
+  if (used.length > 1) {
+    html += '<span class="dock-div"></span>';
+    html += ['All', ...used].map(s =>
+      `<button class="pill" type="button" aria-pressed="${s === state}" data-state="${esc(s)}">${esc(s === 'All' ? 'Any' : s)}<i>${s === 'All' ? leads.length : leads.filter(l => rec(l.key).status === s).length}</i></button>`
+    ).join('');
+  }
+  dockEl.innerHTML = html;
+}
+
+function paintRows() {
+  const list = shown();
+  if (!list.length) { rowsEl.innerHTML = '<p class="blank">Nothing here. Try another filter.</p>'; return; }
+  rowsEl.innerHTML = list.map(l => {
+    const r = rec(l.key);
+    return `<button class="row" type="button" data-key="${esc(l.key)}"
+        data-done="${r.status !== 'Not called' ? 1 : 0}" data-warm="${WARM.includes(r.status) ? 1 : 0}">
+      <span class="dot"></span>
+      <span class="row-mid">
+        <span class="row-name">${esc(l.n)}</span>
+        <span class="row-sub">${esc(l.c)} &middot; ${esc(l.a)}${l.x ? ' &middot; lapsed site' : ''}${r.status !== 'Not called' ? ' &middot; ' + esc(r.status) : ''}</span>
+      </span>
+      <span class="row-end"><span class="row-tel">${esc(pretty(l.p))}</span>${I_NEXT}</span>
+    </button>`;
+  }).join('');
+}
+
+function paint() { paintCount(); paintDock(); paintRows(); }
+
+/* ── lead sheet ────────────────────────── */
+function openLead(key) {
+  openKey = key;
+  const l = byKey(key), r = rec(key);
+  const msg = textFor(l);
+  const actions = l.mobile
+    ? `<div class="big two">
+         <a class="tap tap-solid" href="tel:${telNum(l.p)}">${I_PHONE} Call</a>
+         <a class="tap" href="https://wa.me/${waNum(l.p)}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${I_WA} WhatsApp</a>
+       </div>`
+    : `<div class="big"><a class="tap tap-solid" href="tel:${telNum(l.p)}">${I_PHONE} Call</a></div>
+       <p class="warnline">Landline. WhatsApp won't reach this number.</p>`;
+
+  leadBody.innerHTML = `
+    <div class="grab"></div>
+    <div class="sheet-head">
+      <h2>${esc(l.n)}</h2>
+      <p class="sheet-sub">${esc(l.c)} &middot; ${esc(l.a)}${l.y === 'High' ? ' &middot; ' + l.r + ' reviews' : ''}${l.w ? ' &middot; check site first' : ''}</p>
+    </div>
+    ${l.d ? `<p class="sheet-addr">${esc(l.d)}</p>` : ''}
+    ${l.x ? `<p class="angle">${esc(l.x)}</p>` : ''}
+    <button class="sheet-tel" type="button" id="copytel" title="Tap to copy">${esc(pretty(l.p))}<span class="copyhint">tap to copy</span></button>
+    ${l.p2 ? `<p class="alt"><a href="tel:${telNum(l.p2)}">${esc(pretty(l.p2))}</a> <span>second line</span></p>` : ''}
+    ${l.e ? `<p class="alt"><a href="mailto:${esc(l.e)}">${esc(l.e)}</a> <span>email</span></p>` : ''}
+    ${actions}
+    ${l.mobile ? `<div class="block"><details class="peek"><summary>The message they'll get</summary><div class="quote">${esc(msg)}</div></details></div>` : ''}
+    <div class="block">
+      <p class="cap">How did it go</p>
+      <div class="states" id="states">
+        ${STATES.map(s => `<button class="state" type="button" data-set="${esc(s)}" aria-pressed="${s === r.status}">${s}</button>`).join('')}
       </div>
-      <span class="leads-count" id="leads-count">0</span>
     </div>
-    <div class="leads-search">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="search-input" placeholder="Search by name, phone, area, segment..." autocomplete="off">
-      <button class="search-clear-btn" id="search-clear-btn" style="display:none" title="Clear search">✕</button>
+    <div class="block">
+      <p class="cap">Notes</p>
+      <textarea class="pad" id="pad" placeholder="Who picked up, what they said, when to call back">${esc(r.notes)}</textarea>
     </div>
-    <!-- Quick filter chips -->
-    <div class="quick-chips-bar" id="quick-chips-bar">
-      <button class="chip active" data-chip="all">All</button>
-      <button class="chip" data-chip="today">Today</button>
-      <button class="chip" data-chip="yesterday">Yesterday</button>
-      <button class="chip" data-chip="not-called">Not Called</button>
-      <button class="chip" data-chip="called">Called</button>
-      <button class="chip" data-chip="interested">Interested</button>
-      <button class="chip" data-chip="messaged">Messaged</button>
+    <div class="block">
+      <a class="tap" href="${mapsUrl(l)}" target="_blank" rel="noopener">${I_PIN} Open in Maps</a>
     </div>
-    <div class="leads-scroll" id="leads-list"></div>
-  </section>
+    <div class="block"><button class="ghostbtn" type="button" id="shut">Done</button></div>`;
+  leadDlg.showModal();
+  leadBody.scrollTop = 0;
+}
 
-  <!-- ═══ More/Settings View ═══════════════════ -->
-  <section id="more-view" class="view">
-    <div class="more-header">
-      <h2>Settings & Data</h2>
+async function copyText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; }
+  } catch (_) {}
+  try {
+    const t = document.createElement('textarea');
+    t.value = text;
+    t.setAttribute('readonly', '');
+    t.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(t);
+    t.select();
+    t.setSelectionRange(0, t.value.length);
+    const ok = document.execCommand('copy');
+    t.remove();
+    return ok;
+  } catch (_) { return false; }
+}
+
+leadBody.addEventListener('click', async e => {
+  if (e.target.closest('#shut')) { leadDlg.close(); return; }
+  if (e.target.closest('#copytel')) {
+    const l = byKey(openKey);
+    const ok = await copyText(telNum(l.p));
+    say(ok ? 'Number copied' : telNum(l.p));
+    return;
+  }
+  const b = e.target.closest('[data-set]');
+  if (!b) return;
+  log[openKey] = { ...rec(openKey), status: b.dataset.set };
+  saveCall(openKey);
+  leadBody.querySelectorAll('.state').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  paint();
+});
+
+let padTimer;
+leadBody.addEventListener('input', e => {
+  if (!e.target.closest('#pad')) return;
+  log[openKey] = { ...rec(openKey), notes: e.target.value };
+  writeJSON(K_LOG, log);
+  clearTimeout(padTimer);
+  padTimer = setTimeout(() => saveCall(openKey), 600);
+});
+leadDlg.addEventListener('close', () => { openKey = null; paint(); });
+
+/* ── settings sheet ────────────────────── */
+const KINDS = [['Plumbing','Plumbers & trades'],['School','Schools'],['Training','Colleges & institutes'],['Consultancy','Firms & consultancies'],['Church','Churches']];
+const EG = { Plumbing:['Genius Plumbing Services','Kampala'], School:['Kampala High School','Kawempe'],
+             Training:['Makerere Business Institute','Makerere'],
+             Consultancy:['Uplex & Associates','Nakasero'], Church:['Watoto Church Ntinda','Ntinda'] };
+let editKind = 'Plumbing';
+
+function rawText(k, m) {
+  const saved = cfg.texts[k + ':' + m];
+  return (typeof saved === 'string' && saved.trim()) ? saved : TEXTS[k][m];
+}
+
+function openSet() {
+  setBody.innerHTML = `
+    <div class="grab"></div>
+    <div class="sheet-head"><h2>Settings</h2></div>
+
+    <div class="block">
+      <p class="cap">Your name</p>
+      <input class="line" id="me" type="text" value="${esc(cfg.me)}" autocomplete="name">
     </div>
-    <div class="more-scroll">
-      <div class="settings-group">
-        <div class="settings-group-title">Data Management</div>
-        <div class="settings-group-items">
-          <button class="settings-item" id="btn-upload-more">
-            <div class="si-icon si-accent">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            </div>
-            <div class="si-text"><div class="si-title">Import leads</div><div class="si-desc">Upload CSV or Excel file</div></div>
-            <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-          <button class="settings-item" id="btn-reload-default">
-            <div class="si-icon si-blue">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67"/></svg>
-            </div>
-            <div class="si-text"><div class="si-title">Reload verified Kampala leads</div><div class="si-desc">Reset to 117 curated businesses</div></div>
-            <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-          <button class="settings-item" id="btn-export">
-            <div class="si-icon si-green">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            </div>
-            <div class="si-text"><div class="si-title">Export leads CSV</div><div class="si-desc">Download updated call notes & statuses</div></div>
-            <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-          <button class="settings-item si-danger" id="btn-clear-all">
-            <div class="si-icon si-red">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-            </div>
-            <div class="si-text"><div class="si-title">Clear all leads</div><div class="si-desc">Remove all leads from device</div></div>
-            <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
+
+    <div class="block">
+      <p class="cap">Which message</p>
+      <div class="switch">
+        <button class="state" type="button" data-mode="cold" aria-pressed="${cfg.mode === 'cold'}">First message</button>
+        <button class="state" type="button" data-mode="warm" aria-pressed="${cfg.mode === 'warm'}">After a call</button>
       </div>
-      <div class="settings-group">
-        <div class="settings-group-title">About</div>
-        <div class="settings-group-items">
-          <div class="settings-item si-static">
-            <div class="si-icon si-muted">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            </div>
-            <div class="si-text"><div class="si-title">LeadVault PWA</div><div class="si-desc">Version 2.0 • Offline Ready • Uganda Outreach</div></div>
-          </div>
-        </div>
-      </div>
-      <input type="file" id="file-input-more" accept=".csv,.xlsx,.xls" hidden>
     </div>
-  </section>
 
-  <!-- ═══ Bottom Tab Bar ═══════════════════════ -->
-  <nav id="tab-bar">
-    <button class="tab active" data-tab="home">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Home</span>
-    </button>
-    <button class="tab" data-tab="leads">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-      <span>Leads</span>
-    </button>
-    <button class="tab" data-tab="more">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-      <span>More</span>
-    </button>
-  </nav>
+    <div class="block">
+      <p class="cap">Wording</p>
+      <div class="switch" style="grid-template-columns:1fr 1fr;margin-bottom:9px" id="kinds">
+        ${KINDS.map(([k, label]) => `<button class="state" type="button" data-kind="${k}" aria-pressed="${k === editKind}">${label}</button>`).join('')}
+      </div>
+      <textarea class="pad" id="body" style="min-height:190px">${esc(rawText(editKind, cfg.mode))}</textarea>
+      <p class="tiny"><code>{name}</code> becomes the business name and <code>{area}</code> its area. Nothing sends on its own, WhatsApp just opens with this typed in.</p>
+    </div>
 
-  <div id="toast-container"></div>
+    <div class="block">
+      <p class="cap">Preview</p>
+      <div class="quote" id="eg"></div>
+    </div>
 
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-  <script src="app.js"></script>
+    <div class="block"><button class="ghostbtn" type="button" id="undo">Put the original wording back</button></div>
+    <div class="block"><button class="ghostbtn" type="button" id="csv">Export everything as CSV</button></div>
+    <div class="block"><button class="ghostbtn" type="button" id="save" style="background:var(--ink);color:var(--paper);border-color:var(--ink)">Save</button></div>`;
+  setDlg.showModal();
+  setBody.scrollTop = 0;
+  drawEg();
+}
+
+function drawEg() {
+  const [nm, ar] = EG[editKind];
+  $('eg').textContent = $('body').value
+    .replace(/\{me\}/g, $('me').value.trim() || 'David')
+    .replace(/\{name\}/g, nm).replace(/\{area\}/g, ar);
+}
+
+setBody.addEventListener('click', e => {
+  const m = e.target.closest('[data-mode]');
+  if (m) { cfg.mode = m.dataset.mode; openSet(); return; }
+  const k = e.target.closest('[data-kind]');
+  if (k) {
+    cfg.texts[editKind + ':' + cfg.mode] = $('body').value;
+    editKind = k.dataset.kind;
+    openSet();
+    return;
+  }
+  if (e.target.closest('#undo')) {
+    delete cfg.texts[editKind + ':' + cfg.mode];
+    $('body').value = TEXTS[editKind][cfg.mode];
+    drawEg();
+    return;
+  }
+  if (e.target.closest('#csv')) { exportCSV(); return; }
+  if (e.target.closest('#save')) {
+    cfg.me = $('me').value.trim() || 'David';
+    const key = editKind + ':' + cfg.mode;
+    if ($('body').value.trim() && $('body').value !== TEXTS[editKind][cfg.mode]) cfg.texts[key] = $('body').value;
+    else delete cfg.texts[key];
+    saveCfg();
+    setDlg.close();
+    paint();
+    say('Saved');
+  }
+});
+setBody.addEventListener('input', e => {
+  if (e.target.closest('#body') || e.target.closest('#me')) drawEg();
+});
+$('open-set').addEventListener('click', openSet);
+
+/* ── export ────────────────────────────── */
+function say(msg) {
+  const n = document.createElement('div');
+  n.className = 'note';
+  n.textContent = msg;
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 2400);
+}
+
+function exportCSV() {
+  const cell = v => /[",\n]/.test(String(v ?? '')) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v ?? '');
+  const lines = [['Name','Phone','Line','Segment','Category','Area','Address','Reviews','Priority','Status','Notes'].join(',')];
+  leads.forEach(l => {
+    const r = rec(l.key);
+    lines.push([l.n, telNum(l.p), l.mobile ? 'mobile' : 'landline', l.s, l.c, l.a, l.d, l.r, l.y, r.status, r.notes].map(cell).join(','));
+  });
+  const data = '﻿' + lines.join('\r\n');
+  const filename = 'kampala-calls-' + new Date().toISOString().slice(0, 10) + '.csv';
+  try {
+    const url = URL.createObjectURL(new Blob([data], { type: 'text/csv;charset=utf-8;' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    say('Exported ' + leads.length + ' leads');
+  } catch (_) { say('Could not export on this browser'); }
+}
+
+/* ── events ────────────────────────────── */
+rowsEl.addEventListener('click', e => {
+  const r = e.target.closest('[data-key]');
+  if (r) openLead(r.dataset.key);
+});
+dockEl.addEventListener('click', e => {
+  const s = e.target.closest('[data-seg]');
+  if (s) { seg = s.dataset.seg; paint(); return; }
+  const t = e.target.closest('[data-state]');
+  if (t) { state = t.dataset.state; paint(); }
+});
+$('find').addEventListener('input', e => { find = e.target.value; paintRows(); });
+
+[leadDlg, setDlg].forEach(d => {
+  d.addEventListener('click', e => { if (e.target === d) d.close(); });
+});
+
+/* ── boot ──────────────────────────────── */
+(() => {
+  log = readJSON(K_LOG, {});
+  const saved = readJSON(K_CFG, null);
+  if (saved) cfg = { me: saved.me || 'David', mode: saved.mode === 'warm' ? 'warm' : 'cold', texts: saved.texts || {} };
+  paint();
+
+  window.addEventListener('storage', e => {
+    if (e.key === K_LOG) { log = readJSON(K_LOG, {}); if (!leadDlg.open && !setDlg.open) paint(); }
+    if (e.key === K_CFG) { const c = readJSON(K_CFG, null); if (c) cfg = c; }
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+})();
+</script>
 </body>
 </html>

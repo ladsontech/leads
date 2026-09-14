@@ -1,15 +1,6 @@
 /* Offline shell. Bump CACHE when you redeploy so clients pick up the new build. */
-const CACHE = 'leadvault-pwa-v2';
-const SHELL = [
-  './',
-  'index.html',
-  'style.css',
-  'app.js',
-  'manifest.json',
-  'icons/icon-192.png',
-  'icons/icon-512.png',
-  'leads_current.csv'
-];
+const CACHE = 'callsheet-v2';
+const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
