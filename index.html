@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeadVault — Leads Manager</title>
+  <meta name="description" content="Upload, manage, and contact your leads with one click. Call, WhatsApp, or Email instantly." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header id="app-header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#logoGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <defs><linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#6366f1"/></linearGradient></defs>
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <h1>Lead<span class="accent">Vault</span></h1>
+      </div>
+      <div class="header-actions">
+        <div class="lead-count" id="lead-count">0 leads</div>
+        <button class="btn btn-outline btn-sm" id="btn-export" title="Download leads with your call notes">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span class="btn-label">Export</span>
+        </button>
+        <button class="btn btn-outline btn-sm" id="btn-clear-all" title="Delete all leads">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          <span class="btn-label">Clear All</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="app-main">
+    <!-- Upload Zone -->
+    <section class="upload-section" id="upload-section">
+      <div class="upload-zone" id="upload-zone">
+        <div class="upload-zone-inner">
+          <div class="upload-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <h2>Drop your leads file here</h2>
+          <p>Supports <strong>.csv</strong> and <strong>.xlsx</strong> files</p>
+          <p class="upload-hint">or click to browse</p>
+          <input type="file" id="file-input" accept=".csv,.xlsx,.xls" hidden />
+        </div>
+      </div>
+      <div class="upload-info">
+        <p>📋 Works with <strong>Name</strong>, <strong>Phone</strong>, <strong>Email</strong>, <strong>Company</strong> — and picks up <strong>Segment</strong>, <strong>Area</strong>, <strong>Priority</strong>, <strong>Status</strong> and <strong>Notes</strong> if your file has them.</p>
+      </div>
+    </section>
+
+    <!-- Search & Filter Bar -->
+    <section class="toolbar" id="toolbar" style="display:none;">
+      <div class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" placeholder="Search leads by name, email, company..." autocomplete="off" />
+      </div>
+      <button class="btn btn-primary btn-sm" id="btn-upload-more">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span class="btn-label">Upload More</span>
+      </button>
+    </section>
+
+    <!-- Filters & progress -->
+    <section class="filters" id="filters"></section>
+    <section class="progress" id="progress-bar"></section>
+
+    <!-- Leads Grid -->
+    <section class="leads-grid" id="leads-grid"></section>
+
+    <!-- Empty State (after clear) -->
+    <section class="empty-state" id="empty-state" style="display:none;">
+      <div class="empty-state-inner">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.3">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+        <h2>No leads yet</h2>
+        <p>Upload a file to get started</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Hidden file input for "Upload More" -->
+  <input type="file" id="file-input-more" accept=".csv,.xlsx,.xls" hidden />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
