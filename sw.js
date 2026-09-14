@@ -1,58 +1,30 @@
-/* ═══════════════════════════════════════════════
-   LeadVault — Service Worker (Cache-First PWA)
-   ═══════════════════════════════════════════════ */
+/* Offline shell. Bump CACHE when you redeploy so clients pick up the new build. */
+const CACHE = 'callsheet-v1';
+const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
-const CACHE_NAME = 'leadvault-v2';
-const APP_SHELL = [
-  './',
-  './index.html',
-  './style.css',
-  './app.js',
-  './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-];
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+});
 
-// Install — cache the app shell
-self.addEventListener('install', (e) => {
+self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
-// Activate — clean old caches
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-      )
-    ).then(() => self.clients.claim())
-  );
-});
-
-// Fetch — cache-first for app shell, network-first for everything else
-self.addEventListener('fetch', (e) => {
-  // Skip non-GET and cross-origin requests
-  if (e.request.method !== 'GET') return;
-
+// Network first so a redeploy is picked up, cache as the fallback when offline.
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(response => {
-        // Don't cache non-ok or opaque responses
-        if (!response || response.status !== 200) return response;
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
-        return response;
-      });
-    }).catch(() => {
-      // Fallback for navigation requests
-      if (e.request.mode === 'navigate') {
-        return caches.match('./index.html');
-      }
-    })
+    fetch(req)
+      .then(res => {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+        return res;
+      })
+      .catch(() => caches.match(req).then(hit => hit || caches.match('index.html')))
   );
 });

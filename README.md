@@ -1,37 +1,58 @@
-# Kampala call sheet
+# Kampala Call Sheet
 
-**The live app is on claude.ai:**
-https://claude.ai/code/artifact/edcbea28-4a92-428e-87ca-f8d8ec9ae2a7
+A standalone web app. Deploy this folder to Vercel and it runs on its own,
+with no dependency on Claude or any other service.
 
-Open it on your phone and add it to your home screen. It holds the current
-list of 115 leads, the WhatsApp message templates, and your call outcomes,
-which sync between your phone and your laptop.
+## Files
 
-## What is in this folder
+- `index.html` — the whole app, including the 115 leads and the WhatsApp
+  message templates. One file, no build step.
+- `manifest.webmanifest` — makes it installable on a phone home screen
+- `sw.js` — service worker, so it opens and works with no signal
+- `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` — app icons
+- `vercel.json` — stops Vercel caching `index.html` and `sw.js`, so a
+  redeploy actually reaches phones that already installed it
+- `leads_current.csv` — the same 115 leads as a spreadsheet backup
 
-- `leads_current.csv` — the current 115 leads, exported 14 September 2026.
-  A backup only. The app is the working copy.
-- `index.html` — a stub that points at the app.
+## Installing on a phone
 
-## Safe to delete
+Open the Vercel URL in the phone browser, then Share and "Add to Home
+Screen". It opens full screen with no browser bars.
 
-- `app.js`
-- `style.css`
-- `Claude outputs\preview-mobile.png`
+## Where the data lives
 
-These belonged to the first version of the app that ran locally in this
-folder. It has been replaced. Nothing references them any more.
+Call outcomes and notes are stored in the browser's own storage on each
+device. **They do not sync between your phone and your laptop.** Export to
+CSV from Settings at the end of a calling session if you want one record.
 
-## Why the list shrank from 118 to 115
+If you want real syncing, that needs a small backend. Supabase would do it
+in about an hour of work.
 
-Three listings turned out to have working websites that were simply never
-linked on their Google Maps profile: St Joseph Girls SSS Nsambya
-(joginsa.sc.ug) and the two Daffodils entries (daffodils.ac.ug). They are
-not leads, so they were removed.
+## Redeploying after a change
 
-## Three leads worth calling first
+Bump `CACHE` in `sw.js` (for example `callsheet-v1` to `callsheet-v2`)
+whenever you change `index.html`. Otherwise phones that already installed
+the app keep serving the old copy from their cache.
 
-Career Institute, Makerere Business Training Centre and Kampala Smart School
-all used to have websites whose domains have now lapsed. careerinstituteug.com
-is parked with a "for sale" page. They have already paid for a website once,
-so the conversation is about rebuilding rather than convincing.
+## Editing the leads
+
+The leads are a JSON array at the top of the `<script>` block in
+`index.html`, on the line starting `const LEADS_RAW =`. Fields:
+
+| key | meaning |
+|---|---|
+| `n` | business name |
+| `p` | phone, local format, e.g. `0772123456` |
+| `p2` | second phone, optional |
+| `e` | email, optional |
+| `c` | Google category |
+| `a` | area |
+| `s` | `School`, `Consultancy` or `Church` |
+| `r` | Google review count |
+| `y` | priority, `High` / `Medium` / `Low` |
+| `d` | address |
+| `x` | note shown on the lead, optional |
+| `w` | `1` if the no-website check was ambiguous |
+
+Numbers starting `07` are treated as mobiles and get a WhatsApp button.
+Everything else is treated as a landline and gets Call only.
