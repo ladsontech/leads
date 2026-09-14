@@ -99,15 +99,29 @@
   <!-- ═══ Leads View ═══════════════════════════ -->
   <section id="leads-view" class="view">
     <div class="leads-header">
-      <button class="back-btn" id="leads-back">
+      <button class="back-btn" id="leads-back" title="Back to Home">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
-      <h2 class="leads-title" id="leads-title">All Leads</h2>
+      <div class="leads-title-box">
+        <h2 class="leads-title" id="leads-title">All Leads</h2>
+        <span class="leads-filter-pill" id="leads-filter-pill" style="display:none"></span>
+      </div>
       <span class="leads-count" id="leads-count">0</span>
     </div>
     <div class="leads-search">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="search-input" placeholder="Search leads..." autocomplete="off">
+      <input type="text" id="search-input" placeholder="Search by name, phone, area, segment..." autocomplete="off">
+      <button class="search-clear-btn" id="search-clear-btn" style="display:none" title="Clear search">✕</button>
+    </div>
+    <!-- Quick filter chips -->
+    <div class="quick-chips-bar" id="quick-chips-bar">
+      <button class="chip active" data-chip="all">All</button>
+      <button class="chip" data-chip="today">Today</button>
+      <button class="chip" data-chip="yesterday">Yesterday</button>
+      <button class="chip" data-chip="not-called">Not Called</button>
+      <button class="chip" data-chip="called">Called</button>
+      <button class="chip" data-chip="interested">Interested</button>
+      <button class="chip" data-chip="messaged">Messaged</button>
     </div>
     <div class="leads-scroll" id="leads-list"></div>
   </section>
@@ -115,31 +129,38 @@
   <!-- ═══ More/Settings View ═══════════════════ -->
   <section id="more-view" class="view">
     <div class="more-header">
-      <h2>Settings</h2>
+      <h2>Settings & Data</h2>
     </div>
     <div class="more-scroll">
       <div class="settings-group">
-        <div class="settings-group-title">Data</div>
+        <div class="settings-group-title">Data Management</div>
         <div class="settings-group-items">
           <button class="settings-item" id="btn-upload-more">
             <div class="si-icon si-accent">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             </div>
-            <div class="si-text"><div class="si-title">Import more leads</div><div class="si-desc">Upload CSV or Excel file</div></div>
+            <div class="si-text"><div class="si-title">Import leads</div><div class="si-desc">Upload CSV or Excel file</div></div>
+            <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <button class="settings-item" id="btn-reload-default">
+            <div class="si-icon si-blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67"/></svg>
+            </div>
+            <div class="si-text"><div class="si-title">Reload verified Kampala leads</div><div class="si-desc">Reset to 117 curated businesses</div></div>
             <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
           <button class="settings-item" id="btn-export">
             <div class="si-icon si-green">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </div>
-            <div class="si-text"><div class="si-title">Export leads</div><div class="si-desc">Download CSV with call notes</div></div>
+            <div class="si-text"><div class="si-title">Export leads CSV</div><div class="si-desc">Download updated call notes & statuses</div></div>
             <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
           <button class="settings-item si-danger" id="btn-clear-all">
             <div class="si-icon si-red">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
             </div>
-            <div class="si-text"><div class="si-title">Clear all leads</div><div class="si-desc">Remove all data permanently</div></div>
+            <div class="si-text"><div class="si-title">Clear all leads</div><div class="si-desc">Remove all leads from device</div></div>
             <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
@@ -151,7 +172,7 @@
             <div class="si-icon si-muted">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             </div>
-            <div class="si-text"><div class="si-title">LeadVault</div><div class="si-desc">Version 2.0 — Progressive Web App</div></div>
+            <div class="si-text"><div class="si-title">LeadVault PWA</div><div class="si-desc">Version 2.0 • Offline Ready • Uganda Outreach</div></div>
           </div>
         </div>
       </div>
