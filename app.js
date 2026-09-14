@@ -118,15 +118,19 @@
       t.classList.toggle('active', t.dataset.tab === tab);
     });
 
-    // Hide all views, show the right one
-    [leadsView, categoriesView, settingsView].forEach(v => v.classList.remove('active'));
+    // Hide ALL views (including upload)
+    [uploadSection, leadsView, categoriesView, settingsView].forEach(v => v.classList.remove('active'));
 
     // Show/hide search bar
     searchBar.style.display = (tab === 'settings') ? 'none' : '';
 
     if (tab === 'leads') {
-      leadsView.classList.add('active');
-      renderLeadsView();
+      if (leads.length === 0) {
+        uploadSection.classList.add('active');
+      } else {
+        leadsView.classList.add('active');
+        renderLeadsView();
+      }
     } else if (tab === 'categories') {
       categoriesView.classList.add('active');
       renderCategoriesView();
@@ -144,19 +148,13 @@
   function renderApp() {
     const hasLeads = leads.length > 0;
 
-    if (hasLeads) {
-      uploadSection.classList.remove('active');
-      tabBar.style.display = '';
-      leadCountEl.textContent = `${leads.length} lead${leads.length !== 1 ? 's' : ''}`;
-      switchTab(activeTab);
-    } else {
-      // Show upload, hide everything else
-      [leadsView, categoriesView, settingsView].forEach(v => v.classList.remove('active'));
-      uploadSection.classList.add('active');
-      tabBar.style.display = 'none';
-      searchBar.style.display = 'none';
-      leadCountEl.textContent = '0 leads';
-    }
+    // Always show tab bar (so user can access Settings even with 0 leads)
+    tabBar.style.display = '';
+    leadCountEl.textContent = hasLeads
+      ? `${leads.length} lead${leads.length !== 1 ? 's' : ''}`
+      : '0 leads';
+
+    switchTab(activeTab);
   }
 
   // ── Phone helpers (Uganda) ─────────────────
