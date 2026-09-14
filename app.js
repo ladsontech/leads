@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   LeadVault — App Logic
+   LeadVault — PWA App Logic
    ═══════════════════════════════════════════════ */
 
 (() => {
@@ -14,35 +14,59 @@
   ];
   const DONE_STATUSES = ['Interested', 'Meeting booked', 'Won'];
 
+  const CATEGORY_EMOJIS = {
+    'school':       '🏫',
+    'education':    '🏫',
+    'church':       '⛪',
+    'worship':      '⛪',
+    'consultancy':  '💼',
+    'professional': '💼',
+    'health':       '🏥',
+    'medical':      '🏥',
+    'restaurant':   '🍽️',
+    'food':         '🍽️',
+    'hotel':        '🏨',
+    'technology':   '💻',
+    'finance':      '🏦',
+    'transport':    '🚗',
+    'default':      '📁',
+  };
+
   // ── State ──────────────────────────────────
   let leads = [];
-  let filteredLeads = [];
-  let activeSegment = 'All';
-  let activeStatus = 'All';
+  let activeTab = 'leads';
+  let expandedLeadId = null;
+  let undoTimer = null;
+  let undoLead = null;
 
   // ── DOM refs ───────────────────────────────
+  const appHeader     = document.getElementById('app-header');
+  const searchBar     = document.getElementById('search-bar');
+  const searchInput   = document.getElementById('search-input');
+  const leadCountEl   = document.getElementById('lead-count');
+  const tabBar        = document.getElementById('tab-bar');
   const uploadSection = document.getElementById('upload-section');
-  const uploadZone = document.getElementById('upload-zone');
-  const fileInput = document.getElementById('file-input');
+  const uploadZone    = document.getElementById('upload-zone');
+  const fileInput     = document.getElementById('file-input');
   const fileInputMore = document.getElementById('file-input-more');
-  const toolbar = document.getElementById('toolbar');
-  const searchInput = document.getElementById('search-input');
-  const leadsGrid = document.getElementById('leads-grid');
-  const emptyState = document.getElementById('empty-state');
-  const leadCountEl = document.getElementById('lead-count');
-  const btnClearAll = document.getElementById('btn-clear-all');
+  const leadsView     = document.getElementById('leads-view');
+  const leadsList     = document.getElementById('leads-list');
+  const categoriesView= document.getElementById('categories-view');
+  const categoriesList= document.getElementById('categories-list');
+  const settingsView  = document.getElementById('settings-view');
   const btnUploadMore = document.getElementById('btn-upload-more');
-  const btnExport = document.getElementById('btn-export');
-  const filtersEl = document.getElementById('filters');
-  const progressEl = document.getElementById('progress-bar');
-  const toastContainer = document.getElementById('toast-container');
+  const btnExport     = document.getElementById('btn-export');
+  const btnClearAll   = document.getElementById('btn-clear-all');
+  const toastContainer= document.getElementById('toast-container');
 
   // ── Init ───────────────────────────────────
   loadFromStorage();
   bindEvents();
+  registerServiceWorker();
 
   // ── Event Bindings ─────────────────────────
   function bindEvents() {
+    // Upload zone
     uploadZone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', handleFile);
     fileInputMore.addEventListener('change', handleFile);
@@ -60,34 +84,82 @@
       if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
     });
 
-    searchInput.addEventListener('input', debounce(applyFilters, 200));
-    btnClearAll.addEventListener('click', handleClearAll);
-    btnUploadMore.addEventListener('click', () => fileInputMore.click());
-    if (btnExport) btnExport.addEventListener('click', exportCSV);
+    // Search
+    searchInput.addEventListener('input', debounce(() => renderCurrentView(), 200));
 
-    // Delegated card interactions — survives re-renders
-    leadsGrid.addEventListener('click', (e) => {
-      const del = e.target.closest('[data-delete]');
-      if (del) { e.stopPropagation(); deleteLead(del.dataset.delete); return; }
-      const dead = e.target.closest('a.action-btn.disabled');
-      if (dead) {
-        e.preventDefault();
-        showToast(dead.dataset.why || 'Not available for this lead', 'info');
-      }
+    // Settings buttons
+    btnUploadMore.addEventListener('click', () => fileInputMore.click());
+    btnExport.addEventListener('click', exportCSV);
+    btnClearAll.addEventListener('click', handleClearAll);
+
+    // Tab bar
+    tabBar.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => switchTab(tab.dataset.tab));
     });
-    leadsGrid.addEventListener('change', (e) => {
-      const sel = e.target.closest('[data-status-for]');
-      if (sel) updateLead(sel.dataset.statusFor, { status: sel.value });
+
+    // Lead list interactions (delegated)
+    leadsList.addEventListener('click', handleLeadClick);
+    leadsList.addEventListener('change', handleLeadChange);
+    leadsList.addEventListener('input', debounce(handleLeadInput, 400));
+
+    // Category list interactions (delegated)
+    categoriesList.addEventListener('click', handleCategoryClick);
+    categoriesList.addEventListener('change', handleLeadChange);
+    categoriesList.addEventListener('input', debounce(handleLeadInput, 400));
+  }
+
+  // ── Tab Navigation ─────────────────────────
+  function switchTab(tab) {
+    activeTab = tab;
+    expandedLeadId = null;
+
+    // Update tab buttons
+    tabBar.querySelectorAll('.tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === tab);
     });
-    leadsGrid.addEventListener('input', debounce((e) => {
-      const note = e.target.closest('[data-note-for]');
-      if (note) updateLead(note.dataset.noteFor, { notes: note.value }, true);
-    }, 400));
+
+    // Hide all views, show the right one
+    [leadsView, categoriesView, settingsView].forEach(v => v.classList.remove('active'));
+
+    // Show/hide search bar
+    searchBar.style.display = (tab === 'settings') ? 'none' : '';
+
+    if (tab === 'leads') {
+      leadsView.classList.add('active');
+      renderLeadsView();
+    } else if (tab === 'categories') {
+      categoriesView.classList.add('active');
+      renderCategoriesView();
+    } else if (tab === 'settings') {
+      settingsView.classList.add('active');
+    }
+  }
+
+  function renderCurrentView() {
+    if (activeTab === 'leads') renderLeadsView();
+    else if (activeTab === 'categories') renderCategoriesView();
+  }
+
+  // ── App Render ─────────────────────────────
+  function renderApp() {
+    const hasLeads = leads.length > 0;
+
+    if (hasLeads) {
+      uploadSection.classList.remove('active');
+      tabBar.style.display = '';
+      leadCountEl.textContent = `${leads.length} lead${leads.length !== 1 ? 's' : ''}`;
+      switchTab(activeTab);
+    } else {
+      // Show upload, hide everything else
+      [leadsView, categoriesView, settingsView].forEach(v => v.classList.remove('active'));
+      uploadSection.classList.add('active');
+      tabBar.style.display = 'none';
+      searchBar.style.display = 'none';
+      leadCountEl.textContent = '0 leads';
+    }
   }
 
   // ── Phone helpers (Uganda) ─────────────────
-
-  // Digits only, local form: 0772123456 / 0414267847
   function localDigits(phone) {
     let d = String(phone || '').replace(/\D/g, '');
     if (d.startsWith(COUNTRY_CODE)) d = '0' + d.slice(COUNTRY_CODE.length);
@@ -95,19 +167,16 @@
     return d;
   }
 
-  // wa.me wants country code + number, digits only, no '+' and no leading zero.
   function waNumber(phone) {
     const d = localDigits(phone);
     return d.startsWith('0') ? COUNTRY_CODE + d.slice(1) : d;
   }
 
-  // tel: is happiest with full international form
   function telNumber(phone) {
     const d = localDigits(phone);
     return d.startsWith('0') ? '+' + COUNTRY_CODE + d.slice(1) : '+' + d;
   }
 
-  // Landlines and fixed VoIP (041/039/031/020/042) cannot receive WhatsApp
   function isMobile(phone) {
     return MOBILE_RE.test(localDigits(phone));
   }
@@ -178,7 +247,7 @@
 
   // ── Parsers ────────────────────────────────
   function parseCSV(text) {
-    const clean = text.replace(/^﻿/, '');       // strip BOM
+    const clean = text.replace(/^﻿/, '');
     const lines = clean.split(/\r?\n/).filter(l => l.trim());
     if (lines.length < 2) return [];
 
@@ -217,7 +286,6 @@
     return result;
   }
 
-  // Workbooks often lead with a Summary sheet — pick the one that holds the data.
   function pickSheet(workbook) {
     const named = workbook.SheetNames.find(n => /lead|call|contact|prospect|data/i.test(n));
     if (named) return named;
@@ -257,6 +325,7 @@
         mapsUrl: getVal(row, m.mapsUrl) || '',
         status: STATUSES.includes(status) ? status : 'Not called',
         notes: getVal(row, m.notes) || '',
+        importedAt: Date.now(),
       };
     }).filter(l => (l.name && l.name !== 'Unknown') || l.phone || l.email);
   }
@@ -299,235 +368,450 @@
     return String(row[key] ?? '').trim();
   }
 
-  // ── Rendering ──────────────────────────────
-  function renderApp() {
-    const hasLeads = leads.length > 0;
 
-    uploadSection.style.display = hasLeads ? 'none' : '';
-    toolbar.style.display = hasLeads ? '' : 'none';
-    emptyState.style.display = 'none';
+  // ═══════════════════════════════════════════
+  //  LEADS VIEW — Time-Grouped List
+  // ═══════════════════════════════════════════
 
-    if (!hasLeads) {
-      leadsGrid.innerHTML = '';
-      leadCountEl.textContent = '0 leads';
-      if (filtersEl) filtersEl.innerHTML = '';
-      if (progressEl) progressEl.innerHTML = '';
+  function renderLeadsView() {
+    const q = searchInput.value.trim().toLowerCase();
+    let filtered = leads;
+
+    if (q) {
+      filtered = leads.filter(l =>
+        [l.name, l.email, l.company, l.phone, l.segment, l.area, l.address, l.notes]
+          .some(v => String(v || '').toLowerCase().includes(q))
+      );
+    }
+
+    // Update count
+    leadCountEl.textContent = filtered.length === leads.length
+      ? `${leads.length} lead${leads.length !== 1 ? 's' : ''}`
+      : `${filtered.length} of ${leads.length}`;
+
+    if (filtered.length === 0) {
+      leadsList.innerHTML = `
+        <div class="empty-list">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted)">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <p>${q ? 'No leads match your search' : 'No leads yet'}</p>
+        </div>`;
       return;
     }
 
-    renderFilters();
-    renderProgress();
-    applyFilters();
+    // Group by time
+    const groups = groupByTime(filtered);
+    const frag = document.createDocumentFragment();
+
+    for (const group of groups) {
+      // Time header
+      const header = document.createElement('div');
+      header.className = 'time-group-header';
+      header.innerHTML = `${escapeHtml(group.label)}<span class="count">(${group.leads.length})</span>`;
+      frag.appendChild(header);
+
+      // Lead items
+      for (const lead of group.leads) {
+        frag.appendChild(createLeadItem(lead));
+        frag.appendChild(createLeadDetailPanel(lead));
+      }
+    }
+
+    leadsList.innerHTML = '';
+    leadsList.appendChild(frag);
   }
 
-  function segments() {
-    return [...new Set(leads.map(l => l.segment).filter(Boolean))].sort();
-  }
+  function groupByTime(list) {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const yesterdayStart = todayStart - 86400000;
 
-  function renderFilters() {
-    if (!filtersEl) return;
-    const segs = segments();
-    const chip = (label, val, group, count) =>
-      `<button class="chip ${ (group === 'seg' ? activeSegment : activeStatus) === val ? 'active' : '' }"
-         data-group="${group}" data-val="${escapeHtml(val)}">
-         ${escapeHtml(label)}<span class="chip-count">${count}</span>
-       </button>`;
+    const today = [];
+    const yesterday = [];
+    const olderMap = {};
 
-    let html = '';
-    if (segs.length > 1) {
-      html += `<div class="chip-row">` +
-        chip('All', 'All', 'seg', leads.length) +
-        segs.map(s => chip(shortSegment(s), s, 'seg', leads.filter(l => l.segment === s).length)).join('') +
-        `</div>`;
+    for (const lead of list) {
+      const t = lead.importedAt || 0;
+      if (t >= todayStart) {
+        today.push(lead);
+      } else if (t >= yesterdayStart) {
+        yesterday.push(lead);
+      } else {
+        const dateKey = t ? formatDateLabel(new Date(t)) : 'Imported earlier';
+        if (!olderMap[dateKey]) olderMap[dateKey] = [];
+        olderMap[dateKey].push(lead);
+      }
     }
-    const used = STATUSES.filter(s => leads.some(l => l.status === s));
-    if (used.length > 1 || leads.some(l => l.status !== 'Not called')) {
-      html += `<div class="chip-row">` +
-        chip('Any status', 'All', 'status', leads.length) +
-        used.map(s => chip(s, s, 'status', leads.filter(l => l.status === s).length)).join('') +
-        `</div>`;
-    }
-    filtersEl.innerHTML = html;
 
-    filtersEl.querySelectorAll('.chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (btn.dataset.group === 'seg') activeSegment = btn.dataset.val;
-        else activeStatus = btn.dataset.val;
-        renderFilters();
-        applyFilters();
-      });
+    const groups = [];
+    if (today.length)     groups.push({ label: 'Today', leads: today });
+    if (yesterday.length) groups.push({ label: 'Yesterday', leads: yesterday });
+
+    // Sort older groups by date descending
+    const olderKeys = Object.keys(olderMap).sort((a, b) => {
+      // "Imported earlier" goes last
+      if (a === 'Imported earlier') return 1;
+      if (b === 'Imported earlier') return -1;
+      return 0;
     });
+    for (const key of olderKeys) {
+      groups.push({ label: key, leads: olderMap[key] });
+    }
+
+    return groups;
   }
 
-  function renderProgress() {
-    if (!progressEl) return;
-    const total = leads.length;
-    const touched = leads.filter(l => l.status && l.status !== 'Not called').length;
-    const warm = leads.filter(l => DONE_STATUSES.includes(l.status)).length;
-    const pct = total ? Math.round((touched / total) * 100) : 0;
-    progressEl.innerHTML = `
-      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
-      <div class="progress-label">
-        <span><strong>${touched}</strong> of ${total} called</span>
-        <span class="progress-warm">${warm} interested or better</span>
+  function formatDateLabel(date) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[date.getMonth()]} ${date.getDate()}`;
+  }
+
+  function createLeadItem(lead) {
+    const hasPhone = !!lead.phone;
+    const canWhatsApp = hasPhone && isMobile(lead.phone);
+    const isExpanded = expandedLeadId === lead.id;
+
+    const item = document.createElement('div');
+    item.className = 'lead-item';
+    item.dataset.id = lead.id;
+    if (isExpanded) item.style.background = 'var(--bg-card)';
+
+    const meta = [];
+    if (lead.segment) meta.push(shortSegment(lead.segment));
+    if (lead.area) meta.push(lead.area);
+    if (hasPhone && !canWhatsApp) meta.push('<span class="landline-tag">Landline</span>');
+
+    const priorityBadge = lead.priority
+      ? `<span class="priority-badge ${lead.priority.toLowerCase()}">${escapeHtml(lead.priority)}</span>`
+      : '';
+
+    item.innerHTML = `
+      <div class="lead-item-avatar">${escapeHtml(getInitials(lead.name))}</div>
+      <div class="lead-item-info">
+        <div class="lead-item-name">${escapeHtml(lead.name)}${priorityBadge}</div>
+        <div class="lead-item-meta">${meta.join(' · ')}</div>
+      </div>
+      <div class="lead-item-actions">
+        <a class="lead-action call ${!hasPhone ? 'disabled' : ''}"
+           href="${hasPhone ? 'tel:' + telNumber(lead.phone) : '#'}"
+           title="Call">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+          </svg>
+        </a>
+        <a class="lead-action whatsapp ${!canWhatsApp ? 'disabled' : ''}"
+           href="${canWhatsApp ? 'https://wa.me/' + waNumber(lead.phone) : '#'}"
+           ${canWhatsApp ? 'target="_blank" rel="noopener"' : ''}
+           data-wa-id="${lead.id}"
+           title="WhatsApp">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+          </svg>
+        </a>
       </div>`;
+
+    return item;
   }
 
-  function shortSegment(s) {
-    return String(s).split('/')[0].trim();
+  function createLeadDetailPanel(lead) {
+    const hasPhone = !!lead.phone;
+    const isExpanded = expandedLeadId === lead.id;
+
+    const panel = document.createElement('div');
+    panel.className = `lead-detail-panel${isExpanded ? ' open' : ''}`;
+    panel.dataset.detailId = lead.id;
+
+    let rows = '';
+    if (hasPhone) {
+      rows += `<div class="lead-detail-row">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        <span>${escapeHtml(formatPhone(lead.phone))}</span>
+      </div>`;
+    }
+    if (lead.address) {
+      rows += `<div class="lead-detail-row">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>${escapeHtml(lead.address)}</span>
+      </div>`;
+    }
+    if (lead.email) {
+      rows += `<div class="lead-detail-row">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span>${escapeHtml(lead.email)}</span>
+      </div>`;
+    }
+    if (lead.company) {
+      rows += `<div class="lead-detail-row">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>${escapeHtml(lead.company)}</span>
+      </div>`;
+    }
+
+    panel.innerHTML = `
+      ${rows}
+      <div class="lead-detail-track">
+        <select class="status-select status-${slug(lead.status)}" data-status-for="${lead.id}">
+          ${STATUSES.map(s => `<option value="${s}" ${s === lead.status ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+        <input class="note-input" type="text" data-note-for="${lead.id}"
+               value="${escapeHtml(lead.notes || '')}"
+               placeholder="Call notes…" />
+      </div>
+      <div class="lead-detail-extra">
+        <a class="lead-detail-link ${lead.mapsUrl ? '' : 'disabled'}"
+           href="${lead.mapsUrl ? escapeHtml(lead.mapsUrl) : '#'}"
+           ${lead.mapsUrl ? 'target="_blank" rel="noopener"' : ''}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Maps
+        </a>
+        <button class="lead-delete-btn" data-delete="${lead.id}">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          Delete
+        </button>
+      </div>`;
+
+    return panel;
   }
 
-  function applyFilters() {
+
+  // ═══════════════════════════════════════════
+  //  CATEGORIES VIEW
+  // ═══════════════════════════════════════════
+
+  function renderCategoriesView() {
     const q = searchInput.value.trim().toLowerCase();
-    filteredLeads = leads.filter(l => {
-      if (activeSegment !== 'All' && l.segment !== activeSegment) return false;
-      if (activeStatus !== 'All' && l.status !== activeStatus) return false;
-      if (!q) return true;
-      return [l.name, l.email, l.company, l.phone, l.segment, l.area, l.address, l.notes]
-        .some(v => String(v || '').toLowerCase().includes(q));
+    let filtered = leads;
+
+    if (q) {
+      filtered = leads.filter(l =>
+        [l.name, l.email, l.company, l.phone, l.segment, l.area, l.address, l.notes]
+          .some(v => String(v || '').toLowerCase().includes(q))
+      );
+    }
+
+    // Update count
+    leadCountEl.textContent = filtered.length === leads.length
+      ? `${leads.length} lead${leads.length !== 1 ? 's' : ''}`
+      : `${filtered.length} of ${leads.length}`;
+
+    // Group by segment
+    const segMap = {};
+    for (const lead of filtered) {
+      const seg = lead.segment || 'Uncategorized';
+      if (!segMap[seg]) segMap[seg] = [];
+      segMap[seg].push(lead);
+    }
+
+    const segments = Object.keys(segMap).sort((a, b) => {
+      if (a === 'Uncategorized') return 1;
+      if (b === 'Uncategorized') return -1;
+      return segMap[b].length - segMap[a].length;
     });
 
-    leadCountEl.textContent = filteredLeads.length === leads.length
-      ? `${leads.length} lead${leads.length !== 1 ? 's' : ''}`
-      : `${filteredLeads.length} of ${leads.length}`;
-
-    renderLeads(filteredLeads);
-  }
-
-  function renderLeads(list) {
-    leadsGrid.innerHTML = '';
-
-    if (list.length === 0) {
-      leadsGrid.innerHTML = `
-        <div style="grid-column: 1/-1; text-align:center; padding:48px; color:var(--text-muted);">
-          <p>No leads match your filters</p>
+    if (segments.length === 0) {
+      categoriesList.innerHTML = `
+        <div class="empty-list">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted)">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <p>No categories to show</p>
         </div>`;
       return;
     }
 
     const frag = document.createDocumentFragment();
 
-    list.forEach((lead, i) => {
-      const card = document.createElement('div');
-      card.className = 'lead-card' + (lead.status && lead.status !== 'Not called' ? ' is-touched' : '');
-      card.style.animationDelay = `${Math.min(i * 0.03, 0.5)}s`;
-      card.dataset.id = lead.id;
+    for (const seg of segments) {
+      const section = document.createElement('div');
+      section.className = 'category-section';
+      section.dataset.segment = seg;
 
-      const hasPhone = !!lead.phone;
-      const canWhatsApp = hasPhone && isMobile(lead.phone);
-      const hasEmail = !!lead.email;
+      const emoji = getCategoryEmoji(seg);
 
-      const badges = [
-        lead.priority ? `<span class="badge badge-${lead.priority.toLowerCase()}">${escapeHtml(lead.priority)}</span>` : '',
-        lead.area ? `<span class="badge">${escapeHtml(lead.area)}</span>` : '',
-        hasPhone && !canWhatsApp ? `<span class="badge badge-warn">Landline</span>` : '',
-      ].join('');
-
-      card.innerHTML = `
-        <div class="lead-card-header">
-          <div class="lead-avatar">${escapeHtml(getInitials(lead.name))}</div>
-          <div class="lead-info">
-            <div class="lead-name" title="${escapeHtml(lead.name)}">${escapeHtml(lead.name)}</div>
-            ${lead.company ? `<div class="lead-company" title="${escapeHtml(lead.company)}">${escapeHtml(lead.company)}</div>` : ''}
+      section.innerHTML = `
+        <div class="category-header" data-toggle-cat="${seg}">
+          <div class="category-header-left">
+            <div class="category-icon">${emoji}</div>
+            <h3>${escapeHtml(shortSegment(seg))}</h3>
           </div>
-          <button class="lead-delete-btn" title="Remove lead" data-delete="${lead.id}">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>
-
-        ${badges ? `<div class="lead-badges">${badges}</div>` : ''}
-
-        <div class="lead-details">
-          <div class="lead-detail">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-            <span class="${!hasPhone ? 'text-muted' : ''}">${hasPhone ? escapeHtml(formatPhone(lead.phone)) : 'No phone'}</span>
+          <div class="category-header-right">
+            <span class="category-count">${segMap[seg].length}</span>
+            <svg class="category-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
-          ${lead.address ? `
-          <div class="lead-detail">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span title="${escapeHtml(lead.address)}">${escapeHtml(lead.address)}</span>
-          </div>` : ''}
         </div>
+        <div class="category-leads"></div>`;
 
-        <div class="lead-actions">
-          <a class="action-btn call ${!hasPhone ? 'disabled' : ''}"
-             href="${hasPhone ? 'tel:' + telNumber(lead.phone) : '#'}"
-             data-why="No phone number on this listing"
-             title="Call ${escapeHtml(lead.name)}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-            Call
-          </a>
-          <a class="action-btn whatsapp ${!canWhatsApp ? 'disabled' : ''}"
-             href="${canWhatsApp ? 'https://wa.me/' + waNumber(lead.phone) : '#'}"
-             ${canWhatsApp ? 'target="_blank" rel="noopener"' : ''}
-             data-why="${hasPhone ? 'This is a landline — WhatsApp won\'t reach it' : 'No phone number on this listing'}"
-             title="WhatsApp ${escapeHtml(lead.name)}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            WhatsApp
-          </a>
-          ${hasEmail ? `
-          <a class="action-btn email" href="mailto:${escapeHtml(lead.email)}" title="Email ${escapeHtml(lead.name)}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            Email
-          </a>` : `
-          <a class="action-btn maps ${lead.mapsUrl ? '' : 'disabled'}"
-             href="${lead.mapsUrl ? escapeHtml(lead.mapsUrl) : '#'}"
-             ${lead.mapsUrl ? 'target="_blank" rel="noopener"' : ''}
-             data-why="No Maps link for this lead"
-             title="Open ${escapeHtml(lead.name)} on Google Maps">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Maps
-          </a>`}
-        </div>
+      // Fill the leads container
+      const leadsContainer = section.querySelector('.category-leads');
+      for (const lead of segMap[seg]) {
+        leadsContainer.appendChild(createLeadItem(lead));
+        leadsContainer.appendChild(createLeadDetailPanel(lead));
+      }
 
-        <div class="lead-track">
-          <select class="status-select status-${slug(lead.status)}" data-status-for="${lead.id}" title="Call outcome">
-            ${STATUSES.map(s => `<option value="${s}" ${s === lead.status ? 'selected' : ''}>${s}</option>`).join('')}
-          </select>
-          <input class="note-input" type="text" data-note-for="${lead.id}"
-                 value="${escapeHtml(lead.notes || '')}"
-                 placeholder="Who answered, what they said…" />
-        </div>`;
+      frag.appendChild(section);
+    }
 
-      frag.appendChild(card);
-    });
-
-    leadsGrid.appendChild(frag);
+    categoriesList.innerHTML = '';
+    categoriesList.appendChild(frag);
   }
 
-  // ── Actions ────────────────────────────────
+  function getCategoryEmoji(segment) {
+    const lower = segment.toLowerCase();
+    for (const [key, emoji] of Object.entries(CATEGORY_EMOJIS)) {
+      if (key !== 'default' && lower.includes(key)) return emoji;
+    }
+    return CATEGORY_EMOJIS.default;
+  }
+
+
+  // ═══════════════════════════════════════════
+  //  EVENT HANDLERS
+  // ═══════════════════════════════════════════
+
+  function handleLeadClick(e) {
+    // WhatsApp button click — auto-delete
+    const waBtn = e.target.closest('[data-wa-id]');
+    if (waBtn && !waBtn.classList.contains('disabled')) {
+      const id = waBtn.dataset.waId;
+      // Let the link open normally, then delete
+      setTimeout(() => deleteLeadWithUndo(id, 'Sent to WhatsApp — lead removed'), 100);
+      return;
+    }
+
+    // Call button — don't interfere
+    const callBtn = e.target.closest('.lead-action.call');
+    if (callBtn) return;
+
+    // Delete button
+    const delBtn = e.target.closest('[data-delete]');
+    if (delBtn) {
+      e.preventDefault();
+      deleteLead(delBtn.dataset.delete);
+      return;
+    }
+
+    // Maps link
+    const mapsLink = e.target.closest('.lead-detail-link');
+    if (mapsLink) return;
+
+    // Expand/collapse lead
+    const item = e.target.closest('.lead-item');
+    if (item) {
+      const id = item.dataset.id;
+      expandedLeadId = (expandedLeadId === id) ? null : id;
+      renderCurrentView();
+    }
+  }
+
+  function handleCategoryClick(e) {
+    // Toggle category section
+    const toggle = e.target.closest('[data-toggle-cat]');
+    if (toggle) {
+      const section = toggle.closest('.category-section');
+      section.classList.toggle('open');
+      return;
+    }
+
+    // Delegate to lead click handler
+    handleLeadClick(e);
+  }
+
+  function handleLeadChange(e) {
+    const sel = e.target.closest('[data-status-for]');
+    if (sel) {
+      updateLead(sel.dataset.statusFor, { status: sel.value });
+      sel.className = `status-select status-${slug(sel.value)}`;
+    }
+  }
+
+  function handleLeadInput(e) {
+    const note = e.target.closest('[data-note-for]');
+    if (note) updateLead(note.dataset.noteFor, { notes: note.value }, true);
+  }
+
+
+  // ═══════════════════════════════════════════
+  //  ACTIONS
+  // ═══════════════════════════════════════════
+
   function updateLead(id, patch, quiet) {
     const lead = leads.find(l => l.id === id);
     if (!lead) return;
     Object.assign(lead, patch);
     saveToStorage();
-    renderProgress();
-
-    if (!quiet) {
-      const card = leadsGrid.querySelector(`[data-id="${id}"]`);
-      const sel = card && card.querySelector('.status-select');
-      if (sel) sel.className = `status-select status-${slug(lead.status)}`;
-      if (card) card.classList.toggle('is-touched', lead.status !== 'Not called');
-      renderFilters();
-      if (activeStatus !== 'All') applyFilters();
-    }
+    if (!quiet) showToast(`Status: ${patch.status}`, 'info');
   }
 
   function deleteLead(id) {
-    const card = leadsGrid.querySelector(`[data-id="${id}"]`);
-    if (card) {
-      card.style.transition = 'all 0.3s ease';
-      card.style.opacity = '0';
-      card.style.transform = 'scale(0.9)';
-    }
+    const item = document.querySelector(`.lead-item[data-id="${id}"]`);
+    const panel = document.querySelector(`[data-detail-id="${id}"]`);
+
+    if (item) item.classList.add('removing');
+    if (panel) panel.style.display = 'none';
 
     setTimeout(() => {
       leads = leads.filter(l => l.id !== id);
       saveToStorage();
       if (leads.length === 0) renderApp();
-      else { renderFilters(); renderProgress(); applyFilters(); }
+      else {
+        leadCountEl.textContent = `${leads.length} lead${leads.length !== 1 ? 's' : ''}`;
+        renderCurrentView();
+      }
       showToast('Lead removed', 'info');
-    }, 300);
+    }, 350);
+  }
+
+  function deleteLeadWithUndo(id, message) {
+    const lead = leads.find(l => l.id === id);
+    if (!lead) return;
+
+    // Cancel any previous undo
+    if (undoTimer) {
+      clearTimeout(undoTimer);
+      undoTimer = null;
+      undoLead = null;
+    }
+
+    // Animate out
+    const item = document.querySelector(`.lead-item[data-id="${id}"]`);
+    const panel = document.querySelector(`[data-detail-id="${id}"]`);
+    if (item) item.classList.add('removing');
+    if (panel) panel.style.display = 'none';
+
+    // Remove from state
+    setTimeout(() => {
+      undoLead = { ...lead };
+      leads = leads.filter(l => l.id !== id);
+      saveToStorage();
+
+      if (leads.length === 0) renderApp();
+      else {
+        leadCountEl.textContent = `${leads.length} lead${leads.length !== 1 ? 's' : ''}`;
+        renderCurrentView();
+      }
+
+      // Show undo toast
+      showUndoToast(message || 'Lead removed', () => {
+        // Restore lead
+        if (undoLead) {
+          leads.push(undoLead);
+          leads.sort((a, b) => (b.importedAt || 0) - (a.importedAt || 0));
+          saveToStorage();
+          undoLead = null;
+          renderApp();
+          showToast('Lead restored', 'success');
+        }
+      });
+
+      // Clear undo after 5 seconds
+      undoTimer = setTimeout(() => {
+        undoLead = null;
+        undoTimer = null;
+      }, 5000);
+    }, 350);
   }
 
   function handleClearAll() {
@@ -539,15 +823,13 @@
     if (!confirm(warning)) return;
 
     leads = [];
-    filteredLeads = [];
-    activeSegment = 'All';
-    activeStatus = 'All';
+    activeTab = 'leads';
+    expandedLeadId = null;
     saveToStorage();
     renderApp();
     showToast('All leads cleared', 'info');
   }
 
-  // Call outcomes live in localStorage — this is how they get back out.
   function exportCSV() {
     if (!leads.length) { showToast('Nothing to export', 'info'); return; }
 
@@ -564,7 +846,7 @@
     });
 
     const stamp = new Date().toISOString().slice(0, 10);
-    const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -573,15 +855,19 @@
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showToast(`Exported ${leads.length} leads with your call notes`, 'success');
+    showToast(`Exported ${leads.length} leads`, 'success');
   }
 
-  // ── Storage ────────────────────────────────
+
+  // ═══════════════════════════════════════════
+  //  STORAGE
+  // ═══════════════════════════════════════════
+
   function saveToStorage() {
     try {
       localStorage.setItem('leadvault_leads', JSON.stringify(leads));
     } catch (_) {
-      showToast('Could not save — browser storage is full or blocked', 'error');
+      showToast('Could not save — storage full or blocked', 'error');
     }
   }
 
@@ -591,12 +877,23 @@
       if (!saved) return;
       const parsed = JSON.parse(saved);
       if (!Array.isArray(parsed) || !parsed.length) return;
-      leads = parsed.map(l => ({ status: 'Not called', notes: '', segment: '', area: '', ...l }));
+      leads = parsed.map(l => ({
+        status: 'Not called',
+        notes: '',
+        segment: '',
+        area: '',
+        importedAt: 0,
+        ...l,
+      }));
       renderApp();
     } catch (_) {}
   }
 
-  // ── Utilities ──────────────────────────────
+
+  // ═══════════════════════════════════════════
+  //  UTILITIES
+  // ═══════════════════════════════════════════
+
   function getInitials(name) {
     const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -605,6 +902,10 @@
 
   function slug(s) {
     return String(s || '').toLowerCase().replace(/[^a-z]+/g, '-');
+  }
+
+  function shortSegment(s) {
+    return String(s).split('/')[0].trim();
   }
 
   function escapeHtml(str) {
@@ -621,7 +922,11 @@
     };
   }
 
-  // ── UI Helpers ─────────────────────────────
+
+  // ═══════════════════════════════════════════
+  //  UI HELPERS
+  // ═══════════════════════════════════════════
+
   function showLoading(msg) {
     const overlay = document.createElement('div');
     overlay.className = 'loading-overlay';
@@ -642,6 +947,39 @@
     toast.innerHTML = `<span>${icons[type] || 'ℹ'}</span> ${escapeHtml(msg)}`;
     toastContainer.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
+  }
+
+  function showUndoToast(msg, onUndo) {
+    const toast = document.createElement('div');
+    toast.className = 'toast info';
+    toast.style.animation = 'toastIn 0.3s var(--ease)';
+    toast.innerHTML = `<span>ℹ</span> ${escapeHtml(msg)} <button class="undo-btn">Undo</button>`;
+
+    const undoBtn = toast.querySelector('.undo-btn');
+    undoBtn.addEventListener('click', () => {
+      onUndo();
+      toast.remove();
+    });
+
+    toastContainer.appendChild(toast);
+    setTimeout(() => {
+      if (toast.parentNode) toast.remove();
+    }, 5000);
+  }
+
+
+  // ═══════════════════════════════════════════
+  //  SERVICE WORKER
+  // ═══════════════════════════════════════════
+
+  function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('SW registered'))
+          .catch(err => console.log('SW registration failed:', err));
+      });
+    }
   }
 
 })();
