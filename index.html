@@ -1,35 +1,266 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kampala Call Sheet has moved</title>
-<style>
-  :root{color-scheme:light dark}
-  body{
-    margin:0;min-height:100vh;display:grid;place-items:center;
-    background:#fff;color:#111110;
-    font:15px/1.5 "Helvetica Neue",Arial,sans-serif;padding:24px;
-  }
-  @media (prefers-color-scheme:dark){body{background:#0d0d0c;color:#f3f2ee}}
-  .box{max-width:420px;text-align:left}
-  h1{font-size:20px;font-weight:700;letter-spacing:-.015em;margin:0 0 14px}
-  p{margin:0 0 14px;color:#56554e}
-  @media (prefers-color-scheme:dark){p{color:#9c9a94}}
-  a.go{
-    display:inline-block;margin-top:6px;padding:14px 20px;border-radius:10px;
-    background:#111110;color:#fff;text-decoration:none;font-weight:600;
-  }
-  @media (prefers-color-scheme:dark){a.go{background:#f3f2ee;color:#0d0d0c}}
-  small{display:block;margin-top:22px;font-size:12px;color:#8b8981}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#09090b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="LeadVault — manage your Kampala leads and outreach from your phone">
+  <title>LeadVault</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="box">
-    <h1>This app has moved</h1>
-    <p>The call sheet now runs on claude.ai, so it works on your phone and keeps your call notes in sync across devices.</p>
-    <a class="go" href="https://claude.ai/code/artifact/edcbea28-4a92-428e-87ca-f8d8ec9ae2a7">Open the call sheet</a>
-    <small>The old local version that lived in this folder has been replaced. See README.md.</small>
+
+  <!-- ═══ HOME VIEW ═══════════════════════════ -->
+  <div id="home-view" class="view active">
+    <div class="home-header">
+      <div>
+        <div class="home-greeting" id="home-greeting">Good morning</div>
+        <h1 class="home-title">Lead<span class="accent">Vault</span></h1>
+      </div>
+      <div class="home-badge" id="home-badge">0 leads</div>
+    </div>
+
+    <div class="home-scroll">
+      <!-- Stats Grid -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card sc-indigo">
+          <div class="stat-icon">📋</div>
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Total Leads</div>
+        </div>
+        <div class="stat-card sc-emerald">
+          <div class="stat-icon">📲</div>
+          <div class="stat-value" id="stat-called">0</div>
+          <div class="stat-label">Called</div>
+        </div>
+        <div class="stat-card sc-amber">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-value" id="stat-interested">0</div>
+          <div class="stat-label">Interested</div>
+        </div>
+        <div class="stat-card sc-green">
+          <div class="stat-icon">💬</div>
+          <div class="stat-value" id="stat-wa">0</div>
+          <div class="stat-label">WhatsApp</div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="home-progress" id="home-progress"></div>
+
+      <!-- Timeline Categories -->
+      <div class="home-section">
+        <div class="home-section-title">Timeline</div>
+        <div class="cat-list" id="timeline-cats"></div>
+      </div>
+
+      <!-- Status Categories -->
+      <div class="home-section">
+        <div class="home-section-title">Pipeline</div>
+        <div class="cat-list" id="status-cats"></div>
+      </div>
+
+      <!-- Segment Categories -->
+      <div class="home-section">
+        <div class="home-section-title">Segments</div>
+        <div class="cat-list" id="segment-cats"></div>
+      </div>
+
+      <!-- Upload Zone (shown when no leads) -->
+      <div id="home-upload" style="display:none">
+        <div class="upload-zone" id="upload-zone">
+          <div class="upload-zone-inner">
+            <div class="upload-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <h2>Import your leads</h2>
+            <p>Drag &amp; drop a CSV or Excel file, or tap to browse</p>
+          </div>
+        </div>
+        <input type="file" id="file-input" accept=".csv,.xlsx,.xls" hidden>
+      </div>
+    </div>
   </div>
+
+  <!-- ═══ LEADS VIEW ══════════════════════════ -->
+  <div id="leads-view" class="view">
+    <div class="leads-header">
+      <button class="back-btn" id="leads-back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div class="leads-title-box">
+        <div class="leads-title" id="leads-title">All Leads</div>
+        <div class="leads-filter-pill" id="leads-filter-pill" style="display:none"></div>
+      </div>
+      <div class="leads-count" id="leads-count">0 leads</div>
+    </div>
+
+    <div class="leads-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="search-input" placeholder="Search leads…">
+      <button class="search-clear-btn" id="search-clear-btn" style="display:none">✕</button>
+    </div>
+
+    <div class="quick-chips-bar" id="quick-chips-bar">
+      <button class="chip active" data-chip="all">All</button>
+      <button class="chip" data-chip="today">Today</button>
+      <button class="chip" data-chip="yesterday">Yesterday</button>
+      <button class="chip" data-chip="not-called">Not Called</button>
+      <button class="chip" data-chip="called">Called</button>
+      <button class="chip" data-chip="interested">Interested</button>
+      <button class="chip" data-chip="messaged">Messaged</button>
+    </div>
+
+    <div class="leads-scroll">
+      <div id="leads-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══ MORE / SETTINGS VIEW ════════════════ -->
+  <div id="more-view" class="view">
+    <div class="more-header">
+      <h2>Settings</h2>
+    </div>
+    <div class="more-scroll">
+      <!-- Data Management -->
+      <div class="settings-group">
+        <div class="settings-group-title">Data</div>
+        <div class="settings-group-items">
+          <button class="settings-item" id="btn-upload-more">
+            <div class="si-icon si-accent">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <div class="si-text">
+              <div class="si-title">Import More Leads</div>
+              <div class="si-desc">Add from CSV or Excel file</div>
+            </div>
+            <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <input type="file" id="file-input-more" accept=".csv,.xlsx,.xls" hidden>
+
+          <button class="settings-item" id="btn-reload-default">
+            <div class="si-icon si-blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+              </svg>
+            </div>
+            <div class="si-text">
+              <div class="si-title">Reload Default Leads</div>
+              <div class="si-desc">Reload 117 verified Kampala leads</div>
+            </div>
+            <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
+          <button class="settings-item" id="btn-export">
+            <div class="si-icon si-green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </div>
+            <div class="si-text">
+              <div class="si-title">Export to CSV</div>
+              <div class="si-desc">Download all leads as a spreadsheet</div>
+            </div>
+            <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-group">
+        <div class="settings-group-title">Danger Zone</div>
+        <div class="settings-group-items">
+          <button class="settings-item si-danger" id="btn-clear-all">
+            <div class="si-icon si-red">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+            </div>
+            <div class="si-text">
+              <div class="si-title">Clear All Leads</div>
+              <div class="si-desc">Permanently remove all data</div>
+            </div>
+            <svg class="si-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- About -->
+      <div class="settings-group">
+        <div class="settings-group-title">About</div>
+        <div class="settings-group-items">
+          <div class="settings-item si-static">
+            <div class="si-icon si-muted">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+            </div>
+            <div class="si-text">
+              <div class="si-title">LeadVault v2</div>
+              <div class="si-desc">Kampala Call Sheet • Offline-first PWA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB BAR ═════════════════════════════ -->
+  <nav id="tab-bar">
+    <button class="tab active" data-tab="home">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Home
+    </button>
+    <button class="tab" data-tab="leads">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+        <path d="M16 3.13a4 4 0 010 7.75"/>
+      </svg>
+      Leads
+    </button>
+    <button class="tab" data-tab="more">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+      More
+    </button>
+  </nav>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
